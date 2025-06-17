@@ -1,4 +1,9 @@
 import express from "express";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import hpp from "hpp";
+import xss from "xss-clean";
+import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
@@ -10,6 +15,22 @@ import cors from "cors";
 const app = express();
 
 
+
+// Global rate limiter
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+    message: "Too many requests from this IP, please try again later"
+})
+
+
+
+// Security middleware
+app.use(helmet());
+app.use(mongoSanitize());
+app.use(hpp());
+app.use(xss());
+app.use("/api", limiter); // Apply rate limiter to all API requests
 
 
 // logging middleware (development mode)
