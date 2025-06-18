@@ -15,11 +15,13 @@ import cors from "cors";
 const app = express();
 
 
+const windowMinutes = Number(process.env.RATE_LIMIT_WINDOW) || 15;
+const maxRequests = Number(process.env.RATE_LIMIT_MAX) || 100;
 
 // Global rate limiter
 const limiter = rateLimit({
-	windowMs: 15 * 60 * 1000, // 15 minutes
-	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
+	windowMs: windowMinutes * 60 * 1000, // 15 * 60 * 1000 = 15 minutes
+	limit: maxRequests, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
     message: "Too many requests from this IP, please try again later"
 })
 
