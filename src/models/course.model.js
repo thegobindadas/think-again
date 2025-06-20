@@ -92,11 +92,11 @@ const courseSchema = new mongoose.Schema(
 courseSchema.pre("save", function(next) {
 
     if (this.lectures) {
-        this.totalLectures = this.lectures.length
+        this.totalLectures = this.lectures.length;
     }
 
-    next()
-})
+    next();
+});
 
 
 
