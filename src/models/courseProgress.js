@@ -62,21 +62,28 @@ const courseProgressSchema = new Schema(
 
 
 // Calculate completion percentage before saving
-courseProgressSchema.pre('save', async function(next) {
+courseProgressSchema.pre("save", async function(next) {
 
     if (this.lectureProgress.length > 0) {
+
         const completedLectures = this.lectureProgress.filter(lp => lp.isCompleted).length;
+
         this.completionPercentage = Math.round((completedLectures / this.lectureProgress.length) * 100);
+
         this.isCompleted = this.completionPercentage === 100;
     }
 
+    
     next();
 });
 
 
 // Update last watched at
 courseProgressSchema.methods.updateLastWatchedAt = function () {
+
     this.lastWatchedAt = Date.now();
+
+
     return this.save({ validateBeforeSave: false });
 }
 
