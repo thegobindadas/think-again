@@ -42,7 +42,7 @@ class DatabaseConnection {
     async connect() {
         try {
 
-            if (!process.env.MONGO_URI) {
+            if (!process.env.MONGODB_URI) {
                 throw new Error("MongoDB URI is not defined in environment variables");
             }
 
@@ -59,7 +59,7 @@ class DatabaseConnection {
                 mongoose.set("debug", true);
             }
 
-            await mongoose.connect(process.env.MONGO_URI, connectionOptions);
+            await mongoose.connect(process.env.MONGODB_URI, connectionOptions);
             this.retryCount = 0; // Reset retry count on successful connection
             
         } catch (error) {
