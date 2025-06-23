@@ -20,6 +20,7 @@ const router = Router();
 
 // Auth routes
 router.route("/signup").post(validateSignup, createUserAccount);
+router.route("/signin").post(validateSignin, authenticateUser);
 
 
 

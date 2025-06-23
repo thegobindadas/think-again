@@ -42,8 +42,29 @@ export const createUserAccount = catchAsync(async (req, res) => {
  * @route POST /api/v1/users/signin
  */
 export const authenticateUser = catchAsync(async (req, res) => {
-  // TODO: Implement user authentication functionality
+
+  const { email, password } = req.body;
+
+  const user = await User.findOne({ email: email.toLowerCase() }).select("+password");
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+
+  const isPasswordCorrect =   await user.comparePassword(password);
+
+  if (!isPasswordCorrect) {
+    throw new AppError("Invalid password", 401);
+  }
+
+
+  await user.updateLastActiveAt();
+
+  generateToken(res, user, "User logged in successfully");
+
 });
+
 
 /**
  * Sign out user and clear cookie
