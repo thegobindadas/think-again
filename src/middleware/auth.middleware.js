@@ -46,7 +46,18 @@ export const isAuthenticated = catchAsync(async (req, res, next) => {
 });
 
 
+// Middleware for role-based access control
+export const restrictTo = (...roles) => {
+  return catchAsync(async (req, res, next) => {
 
+    // roles is an array ['admin', 'instructor']
+    if (!roles.includes(req.user.role)) {
+      throw new AppError("You do not have permission to perform this action", 403);
+    }
+
+    next();
+  });
+};
 
 
 // Optional authentication middleware
