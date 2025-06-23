@@ -24,6 +24,9 @@ router.route("/signin").post(validateSignin, authenticateUser);
 router.route("/signout").post(signOutUser);
 
 
+// Profile routes
+router.route("/profile").get(isAuthenticated, getCurrentUserProfile);
+
 
 
 

@@ -87,14 +87,34 @@ export const signOutUser = catchAsync(async (_, res) => {
 });
 
 
-
 /**
  * Get current user profile
  * @route GET /api/v1/users/profile
  */
 export const getCurrentUserProfile = catchAsync(async (req, res) => {
-  // TODO: Implement get current user profile functionality
+  
+  const user = await User.findById(req.id).populate({
+    path: "enrolledCourses.course",
+    select: "title description price thumbnail"
+  })
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+
+  
+  return res.status(200).json({
+    data: {
+      ...user.toJSON(),
+      totalEnrolledCourses: user.totalEnrolledCourses
+    },
+    message: "User profile fetched successfully",
+    success: true,
+  });
 });
+
+
 
 /**
  * Update user profile
