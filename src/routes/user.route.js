@@ -26,6 +26,11 @@ router.route("/signout").post(signOutUser);
 
 // Profile routes
 router.route("/profile").get(isAuthenticated, getCurrentUserProfile);
+router.route("/profile").patch( 
+    isAuthenticated,
+    upload.single("avatar"),
+    updateUserProfile
+);
 
 
 

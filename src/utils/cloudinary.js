@@ -12,7 +12,7 @@ cloudinary.config({
 
 
 
-export const uploadMedia = async (file) => {
+export const uploadMediaToCloudinary = async (file) => {
   try {
 
     const uploadResponse = await cloudinary.uploader.upload(file, {
@@ -31,7 +31,10 @@ export const uploadMedia = async (file) => {
 export const deleteMediaFromCloudinary = async (publicId) => {
   try {
 
-    await cloudinary.uploader.destroy(publicId);
+    const deleteResponse = await cloudinary.uploader.destroy(publicId);
+
+
+    return deleteResponse;
 
   } catch (error) {
     console.error(error);
@@ -42,7 +45,10 @@ export const deleteMediaFromCloudinary = async (publicId) => {
 export const deleteVideoFromCloudinary = async (publicId) => {
   try {
 
-    await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+    const deleteResponse = await cloudinary.uploader.destroy(publicId, { resource_type: "video" });
+
+
+    return deleteResponse;
 
   } catch (error) {
     console.error(error);

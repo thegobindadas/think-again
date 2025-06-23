@@ -2,6 +2,7 @@ import { catchAsync } from "../middleware/error.middleware";
 import { AppError } from "../middleware/error.middleware";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
+import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary";
 
 
 
@@ -115,14 +116,70 @@ export const getCurrentUserProfile = catchAsync(async (req, res) => {
 });
 
 
-
 /**
  * Update user profile
  * @route PATCH /api/v1/users/profile
  */
 export const updateUserProfile = catchAsync(async (req, res) => {
-  // TODO: Implement update user profile functionality
+  
+  const { name, bio } = req.body
+  const updatedData = { name, bio }
+
+
+  const user = await User.findById(req.id);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+
+  if (req.file) {
+    const uploadResponse = await uploadMediaToCloudinary(req.file.path);
+
+    if (!uploadResponse) {
+      throw new AppError("Failed to upload profile picture", 500);
+    }
+
+    updatedData.avatar = uploadResponse.secure_url;
+    updatedData.avatarPublicId = uploadResponse.public_id;
+
+
+    let deleteResponse;
+    if (user.avatar && user.avatar !== "default-avatar.png" ) {
+      deleteResponse = await deleteMediaFromCloudinary(user.avatarPublicId)
+    }
+    
+    if (deleteResponse.result !== "ok") {
+      throw new AppError("Failed to delete old profile picture", 500);
+    }
+    
+  }
+
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.id,
+    updatedData,
+    { 
+      new: true, 
+      runValidators: true
+    }
+  )
+
+  if (!updatedUser) {
+    throw new AppError("Failed to update user profile", 500);
+  }
+
+
+
+  return res.status(200).json({
+    data: updatedUser,
+    message: "Profile updated successfully",
+    success: true,
+  });
+
 });
+
+
 
 /**
  * Change user password
