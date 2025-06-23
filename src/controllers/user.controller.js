@@ -71,8 +71,22 @@ export const authenticateUser = catchAsync(async (req, res) => {
  * @route POST /api/v1/users/signout
  */
 export const signOutUser = catchAsync(async (_, res) => {
-  // TODO: Implement sign out functionality
+  
+  res.cookie("token", "", 
+    {
+      maxAge: 0,
+    }
+  )
+
+
+
+  return res.status(200).json({
+    message: "User signed out successfully",
+    success: true,
+  });
 });
+
+
 
 /**
  * Get current user profile

@@ -28,6 +28,7 @@ export const generateToken = (res, user, message) => {
     .json(
       {
         user,
+        token,
         message,
         success: true,
       }
