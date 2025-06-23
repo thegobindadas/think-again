@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
             type: String,
             default: "default-avatar.png"
         },
+        avatarPublicId: {
+            type: String,
+            required: [true, "Public id is required for user avatar management"]
+        },
         bio: {
             type: String,
             maxLength: [400, "Bio cannot exceed 400 characters"]
