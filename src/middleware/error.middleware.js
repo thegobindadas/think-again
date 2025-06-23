@@ -66,6 +66,27 @@ export const errorHandler = (err, req, res, next) => {
     }
 };
 
+
+// Handle specific MongoDB errors
+export const handleMongoError = (err) => {
+
+    if (err.name === "CastError") {
+        return new AppError(`Invalid ${err.path}: ${err.value}`, 400);
+    }
+    if (err.code === 11000) {
+        const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+        return new AppError(`Duplicate field value: ${value}. Please use another value!`, 400);
+    }
+    if (err.name === "ValidationError") {
+        const errors = Object.values(err.errors).map(el => el.message);
+        return new AppError(`Invalid input data. ${errors.join('. ')}`, 400);
+    }
+
+
+    return err;
+};
+
+
 // Handle JWT errors
 export const handleJWTError = () => 
     new AppError("Invalid token. Please log in again!", 401);
