@@ -24,6 +24,7 @@ export const validate = (validations) => {
 };
 
 
+
 // Common validation chains
 export const commonValidations = {
     pagination: [
@@ -90,3 +91,28 @@ export const validateSignin = validate([
         .withMessage("Password is required")
 ]);
 
+export const validatePasswordChange = validate([
+    body("currentPassword")
+        .notEmpty()
+        .withMessage("Current password is required"),
+    body("newPassword")
+        .notEmpty()
+        .withMessage("New password is required")
+        .custom((value, { req }) => {
+            if (value === req.body.currentPassword) {
+                throw new Error("New password must be different from current password");
+            }
+            return true;
+        })
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+        .withMessage("Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character"),
+    body("confirmPassword")
+        .notEmpty()
+        .withMessage("Confirm password is required")
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error("New password & confirm password should be same");
+            }
+            return true;
+        })
+]);
