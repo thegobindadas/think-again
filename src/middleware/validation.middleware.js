@@ -83,3 +83,10 @@ export const validateSignup = validate([
     commonValidations.password
 ]);
 
+export const validateSignin = validate([
+    commonValidations.email,
+    body("password")
+        .notEmpty()
+        .withMessage("Password is required")
+]);
+
