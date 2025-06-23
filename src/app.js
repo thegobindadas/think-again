@@ -8,6 +8,9 @@ import morgan from "morgan";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
+// import routes
+import healthRoute from "./routes/health.route.js";
+
 
 
 
@@ -68,23 +71,9 @@ app.use(
 
 
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-    console.error(err.stack);
 
-    res.status(err.status ||  500).json({
-        status: "error",
-        message: err.message || "Internal Server Error",
-        ...(process.env.NODE_ENV === "development" && { stack: err.stack })
-    });
-    
-});
-
-
-
-
-
-// import routes
+// use routes
+app.use("/api/v1/health", healthRoute);
 
 
 
@@ -97,6 +86,19 @@ app.use((req, res) => {
         message: "Route Not Found"
     })
 })
+
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+
+    res.status(err.status ||  500).json({
+        status: "error",
+        message: err.message || "Internal Server Error",
+        ...(process.env.NODE_ENV === "development" && { stack: err.stack })
+    });
+    
+});
 
 
 
