@@ -76,3 +76,10 @@ export const commonValidations = {
 
 
 
+// User validation chains
+export const validateSignup = validate([
+    commonValidations.name,
+    commonValidations.email,
+    commonValidations.password
+]);
+
