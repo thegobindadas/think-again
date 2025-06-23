@@ -1,8 +1,7 @@
-import jwt from "jsonwebtoken";
-import { AppError } from "./error.middleware.js";
 import { catchAsync } from "./error.middleware.js";
+import { AppError } from "./error.middleware.js";
 import { User } from "../models/user.model.js";
-
+import jwt from "jsonwebtoken";
 
 
 export const isAuthenticated = catchAsync(async (req, res, next) => {
@@ -22,6 +21,7 @@ export const isAuthenticated = catchAsync(async (req, res, next) => {
     // Add user ID to request
     req.id = decoded.userId;
 
+    /*
     const user = await User.findById(req.id);
 
     if (!user) {
@@ -29,7 +29,7 @@ export const isAuthenticated = catchAsync(async (req, res, next) => {
     }
 
     req.user = user;
-
+    */
 
     next();
 
@@ -60,7 +60,7 @@ export const optionalAuth = catchAsync(async (req, res, next) => {
       req.id = decoded.userId;
     }
 
-
+    
     next();
 
   } catch (error) {

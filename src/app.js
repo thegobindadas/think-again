@@ -9,6 +9,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 
 // import routes
+import userRoute from "./routes/user.route.js";
 import healthRoute from "./routes/health.route.js";
 
 
@@ -73,7 +74,8 @@ app.use(
 
 
 // use routes
-app.use("/api/v1/health", healthRoute);
+app.use("/api/v1/users", userRoute);
+app.use("/health", healthRoute);
 
 
 
