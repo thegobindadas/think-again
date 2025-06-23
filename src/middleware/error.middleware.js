@@ -1,12 +1,27 @@
 // Custom error class
 export class AppError extends Error {
-    constructor(message, statusCode) {
+    constructor(
+        message = "Something went wrong", 
+        statusCode = 500,
+        errors = [], // for field-level errors
+        stack = null,
+    ) {
         super(message);
+
         this.statusCode = statusCode;
+        this.message = message;
+        this.errors = errors;
         this.status = `${statusCode}`.startsWith("4") ? "fail" : "error";
         this.isOperational = true;
+        this.success = false;
+        this.data = null;
 
-        Error.captureStackTrace(this, this.constructor);
+        
+        if (stack) {
+            this.stack = stack;
+        } else {
+            Error.captureStackTrace(this, this.constructor);
+        }
     }
 }
 
