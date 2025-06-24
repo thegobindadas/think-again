@@ -10,6 +10,7 @@ import cors from "cors";
 
 // import routes
 import userRoute from "./routes/user.route.js";
+import razorpayRoute from "./routes/razorpay.route.js";
 import healthRoute from "./routes/health.route.js";
 
 
@@ -17,6 +18,7 @@ import healthRoute from "./routes/health.route.js";
 
 
 const app = express();
+
 
 
 const windowMinutes = Number(process.env.RATE_LIMIT_WINDOW) || 15;
@@ -74,7 +76,8 @@ app.use(
 
 
 // use routes
-app.use("/api/v1/users", userRoute);
+app.use("/api/v1/user", userRoute);
+app.use("/api/v1/razorpay", razorpayRoute);
 app.use("/health", healthRoute);
 
 
