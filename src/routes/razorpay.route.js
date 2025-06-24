@@ -15,7 +15,7 @@ const router = Router();
 
 router.route("/create-order").post(isAuthenticated, createRazorpayOrder);
 
-
+router.route("/verify-payment").post(isAuthenticated, verifyPayment);
 
 
 

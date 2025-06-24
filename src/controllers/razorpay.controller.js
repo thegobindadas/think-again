@@ -3,6 +3,7 @@ import { User } from "../models/user.model";
 import { Course } from "../models/course.model";
 import { CoursePurchase } from "../models/coursePurchase.model";
 import { AppError } from "../middleware/error.middleware";
+import crypto from "crypto";
 
 
 const razorpay = new Razorpay({
@@ -90,5 +91,49 @@ export const createRazorpayOrder = async (req, res) => {
     
   } catch (error) {
     throw new AppError(error?.description || "Failed to create Razorpay order", 400);
+  }
+};
+
+
+export const verifyPayment = async (req, res) => {
+  try {
+
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+      throw new AppError("Missing payment details", 400);
+    }
+
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id
+
+    const expectedSignature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET).update(body.toString()).digest("hex");
+
+    const isAuthentic = expectedSignature === razorpay_signature;
+
+    if (!isAuthentic) {
+      throw new AppError("Payment verification failed", 400);
+    }
+
+
+    const purchase = await CoursePurchase.findOne({ paymentId: razorpay_order_id })
+
+    if (!purchase) {
+      throw new AppError("Purchase record not found", 404);
+    }
+
+
+    purchase.status = "completed"
+    await purchase.save()
+
+
+
+    return res.status(200).json({
+      message: "Payment verified successfully",
+      success: true,
+    })
+
+  } catch (error) {
+    throw new AppError(error?.description || "Failed to verify payment", 400);
   }
 };
