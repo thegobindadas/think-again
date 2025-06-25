@@ -215,4 +215,4 @@ export const refundPayment = async (req, res) => {
     const errMsg = error?.error?.description || error?.description || error?.message || "Failed to refund payment";
     throw new AppError(errMsg, 500);
   }
-}
+};
