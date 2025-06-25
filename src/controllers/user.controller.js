@@ -180,14 +180,50 @@ export const updateUserProfile = catchAsync(async (req, res) => {
 });
 
 
-
 /**
  * Change user password
  * @route PATCH /api/v1/users/password
  */
 export const changeUserPassword = catchAsync(async (req, res) => {
-  // TODO: Implement change user password functionality
+
+  const userId = req.id
+  const { currentPassword, newPassword, confirmPassword } = req.body
+
+
+  const user = await User.findById(userId).select("+password")
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+
+  const isPasswordCorrect = await user.comparePassword(currentPassword)
+
+  if (!isPasswordCorrect) {
+    throw new AppError("Current password is incorrect", 401);
+  }
+
+
+  if (newPassword !== confirmPassword) {
+    throw new AppError("New password and confirm password should be same", 400);
+  }
+
+
+  user.password = newPassword
+  await user.save()
+
+
+
+  return res.status(200).json({
+    message: "Password changed successfully",
+    success: true,
+  });
 });
+
+
+
+
+
 
 /**
  * Request password reset

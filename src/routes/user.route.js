@@ -33,6 +33,14 @@ router.route("/profile").patch(
 );
 
 
+// Password management
+router.patch("/change-password",
+    isAuthenticated,
+    validatePasswordChange,
+    changeUserPassword
+);
+
+
 
 
 
