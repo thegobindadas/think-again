@@ -37,6 +37,10 @@ const coursePurchaseSchema = new mongoose.Schema(
             type: String,
             required: [true, "Payment method is required"]
         },
+        orderId: {
+            type: String,
+            required: [true, "Payment ID is required"]
+        },
         paymentId: {
             type: String,
             required: [true, "Payment ID is required"]
@@ -50,6 +54,9 @@ const coursePurchaseSchema = new mongoose.Schema(
         },
         refundReason: {
             type: String
+        },
+        refundedAt: {
+            type: Date
         },
         metadata: {
             type: Map,
@@ -89,6 +96,8 @@ coursePurchaseSchema.methods.processRefund = async function(reason, amount){
 
     this.refundReason = reason;
 
+    this.refundedAt = Date.now();
+
     this.refundAmount = amount || this.amount;
 
 
@@ -97,4 +106,4 @@ coursePurchaseSchema.methods.processRefund = async function(reason, amount){
 
 
 
-export const CoursePurchase=mongoose.model("CoursePurchase", coursePurchaseSchema);
+export const CoursePurchase = mongoose.model("CoursePurchase", coursePurchaseSchema);

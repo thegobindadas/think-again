@@ -66,7 +66,7 @@ export const createRazorpayOrder = async (req, res) => {
     const order = await razorpay.orders.create(options);
 
     if (!order || !order.id) {
-      throw new AppError(500, "Invalid order response from Razorpay");
+      throw new AppError("Invalid order response from Razorpay", 500);
     }
 
     if (order.amount !== amountInPaise) {
@@ -74,7 +74,7 @@ export const createRazorpayOrder = async (req, res) => {
     }
 
 
-    newPurchase.paymentId = order.id
+    newPurchase.orderId = order.id
     await newPurchase.save()
 
 
@@ -85,7 +85,7 @@ export const createRazorpayOrder = async (req, res) => {
         title: course.title,
         description: course.description,
       },
-      message: "",
+      message: "Order created successfully",
       success: true,
     })
     
@@ -116,19 +116,25 @@ export const verifyPayment = async (req, res) => {
     }
 
 
-    const purchase = await CoursePurchase.findOne({ paymentId: razorpay_order_id })
+    const purchase = await CoursePurchase.findOne({ orderId: razorpay_order_id })
 
     if (!purchase) {
       throw new AppError("Purchase record not found", 404);
     }
 
 
+    const payment = await razorpay.payments.fetch(razorpay_payment_id)
+
+
     purchase.status = "completed"
+    purchase.paymentMethod = payment.method;
+    purchase.paymentId = razorpay_payment_id;
     await purchase.save()
 
 
 
     return res.status(200).json({
+      payment,
       message: "Payment verified successfully",
       success: true,
     })
