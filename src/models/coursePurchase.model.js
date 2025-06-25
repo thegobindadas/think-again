@@ -39,7 +39,7 @@ const coursePurchaseSchema = new mongoose.Schema(
         },
         orderId: {
             type: String,
-            required: [true, "Payment ID is required"]
+            required: [true, "Order ID is required"]
         },
         paymentId: {
             type: String,
@@ -74,6 +74,7 @@ const coursePurchaseSchema = new mongoose.Schema(
 // Index for faster queries
 coursePurchaseSchema.index({ user: 1, course: 1 });
 coursePurchaseSchema.index({ status: 1 });
+coursePurchaseSchema.index({ paymentId: 1 }, { unique: true });
 coursePurchaseSchema.index({ createdAt: -1 });
 
 
@@ -90,15 +91,23 @@ coursePurchaseSchema.virtual("isRefundable").get(function(){
 
 
 // Method to process refund
-coursePurchaseSchema.methods.processRefund = async function(reason, amount){
+coursePurchaseSchema.methods.processRefund = async function(refundId, amount, reason){
 
     this.status = "refunded";
+
+    this.refundId = refundId;
 
     this.refundReason = reason;
 
     this.refundedAt = Date.now();
 
-    this.refundAmount = amount || this.amount;
+
+    const finalAmount = amount || this.amount;
+
+    if (finalAmount > this.amount) throw new Error("Refund amount exceeds original amount");
+
+    this.refundAmount = finalAmount;
+
 
 
     return this.save();

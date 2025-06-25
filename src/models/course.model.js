@@ -41,6 +41,10 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required:[true, "Course thumbnail is required"]
         },
+        thumbnailPublicId: {
+            type: String,
+            required: [true, "Public id is required for video management"]
+        },
         enrolledStudents: [
             {
                 type: mongoose.Schema.Types.ObjectId,

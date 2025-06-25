@@ -90,7 +90,7 @@ export const createRazorpayOrder = async (req, res) => {
     })
     
   } catch (error) {
-    throw new AppError(error?.description || "Failed to create Razorpay order", 400);
+    throw new AppError(error?.description || "Failed to create Razorpay order", 500);
   }
 };
 
@@ -134,12 +134,85 @@ export const verifyPayment = async (req, res) => {
 
 
     return res.status(200).json({
-      payment,
+      purchase,
       message: "Payment verified successfully",
       success: true,
     })
 
   } catch (error) {
-    throw new AppError(error?.description || "Failed to verify payment", 400);
+    throw new AppError(error?.description || "Failed to verify payment", 500);
   }
 };
+
+
+export const refundPayment = async (req, res) => {
+  try {
+    
+    const userId = req.id;
+    const { purchaseId, refundReason } = req.body;
+
+    if (!purchaseId || !refundReason) {
+      throw new AppError("Missing refund details", 400);
+    }
+
+
+    const purchaseDetails = await CoursePurchase.findOne({_id: purchaseId, user: userId})
+
+    if (!purchaseDetails) {
+      throw new AppError("Purchase record not found", 404);
+    }
+
+    if (purchaseDetails.status === "refunded") {
+      throw new AppError("This purchase has already been refunded", 400);
+    }
+
+
+    const isRefundable = purchaseDetails.isRefundable
+
+    if (!isRefundable) {
+      throw new AppError("Refund is not available for this purchase", 400);
+    }
+    
+    
+    const refundAmount = purchaseDetails.amount
+    const RazorpayPaymentId = purchaseDetails.paymentId
+
+    const options = {
+      "amount": Math.round(refundAmount * 100),
+      "speed": "normal",
+      "notes": {
+        purchaseId: String(purchaseDetails._id),
+        userId: String(purchaseDetails.user),
+        courseId: String(purchaseDetails.course),
+        reason: refundReason
+      },
+      "receipt": `course_${purchaseDetails.course}`
+    }
+
+    const refund = await razorpay.payments.refund(RazorpayPaymentId, options)
+
+    if (!refund || !refund.id) {
+      throw new AppError("Invalid refund response from Razorpay", 500);
+    }
+
+
+    await purchaseDetails.processRefund(refund.id, refundAmount, refundReason)
+    await purchaseDetails.save()
+
+
+
+    return res.status(200).json({
+      data: {
+        refundId: refund.id,
+        refundStatus: refund.status,
+        refundedAt: purchaseDetails.refundedAt,
+      },
+      message: "Payment refund initiated successfully",
+      success: true,
+    })
+
+  } catch (error) {
+    const errMsg = error?.error?.description || error?.description || error?.message || "Failed to refund payment";
+    throw new AppError(errMsg, 500);
+  }
+}
