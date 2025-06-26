@@ -41,7 +41,6 @@ const userSchema = new mongoose.Schema(
         },
         avatarPublicId: {
             type: String,
-            required: [true, "Public id is required for user avatar management"]
         },
         bio: {
             type: String,

@@ -19,6 +19,7 @@ export const validate = (validations) => {
             message: err.msg
         }));
 
+        
         throw new AppError("Validation failed", 400, extractedErrors);
     };
 };

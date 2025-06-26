@@ -96,9 +96,10 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
     console.error(err.stack);
 
-    res.status(err.status ||  500).json({
+    res.status(err.statusCode ||  500).json({
         status: "error",
         message: err.message || "Internal Server Error",
+        errors: err.errors || [],
         ...(process.env.NODE_ENV === "development" && { stack: err.stack })
     });
     

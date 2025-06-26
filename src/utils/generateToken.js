@@ -27,7 +27,21 @@ export const generateToken = (res, user, message) => {
     )
     .json(
       {
-        user,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          avatar: user.avatar,
+          avatarPublicId: user.avatar && user.avatar !== "default-avatar.png" ? user.avatarPublicId : undefined,
+          bio: user.bio || "",
+          createdCourses: user.createdCourses || [],
+          enrolledCourses: user.enrolledCourses || [],
+          totalEnrolledCourses: user.totalEnrolledCourses ?? 0,
+          lastActiveAt: user.lastActiveAt,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt,
+        },
         token,
         message,
         success: true,

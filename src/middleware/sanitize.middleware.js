@@ -4,7 +4,7 @@ import xss from "xss-clean";
 
 
 // Middleware to sanitize user input
-export const safeSanitize = (req, _, next) => {
+export const safeSanitize = (req, res, next) => {
     // Apply mongo-sanitize to req.body, req.params, req.query manually
     mongoSanitize.sanitize(req.body);
     mongoSanitize.sanitize(req.params);
@@ -15,7 +15,7 @@ export const safeSanitize = (req, _, next) => {
 };
 
 
-export const xssSanitize = (req, _, next) => {
+export const xssSanitize = (req, res, next) => {
     // Sanitize individual request parts
     if (req.body) {
         for (let key in req.body) {
