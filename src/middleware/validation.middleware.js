@@ -121,3 +121,28 @@ export const validatePasswordChange = validate([
 export const validateForgotPassword = validate([
     commonValidations.email
 ]);
+
+
+export const validateResetPassword = validate([
+    param("resetToken")
+        .notEmpty()
+        .withMessage("Reset token is required"),
+
+    body("newPassword")
+        .notEmpty()
+        .withMessage("New password is required")
+        .isLength({ min: 8 })
+        .withMessage("Password must be at least 8 characters long")
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])/)
+        .withMessage("Password must contain at least one number, one uppercase letter, one lowercase letter, and one special character"),
+
+    body("confirmPassword")
+        .notEmpty()
+        .withMessage("Confirm password is required")
+        .custom((value, { req }) => {
+            if (value !== req.body.newPassword) {
+                throw new Error("New password & confirm password should be same");
+            }
+            return true;
+        })
+]);

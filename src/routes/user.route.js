@@ -7,6 +7,7 @@ import {
     updateUserProfile,
     changeUserPassword,
     forgotPassword,
+    resetPassword,
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { 
@@ -14,6 +15,7 @@ import {
     validateSignin, 
     validatePasswordChange,
     validateForgotPassword,
+    validateResetPassword,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
@@ -48,6 +50,7 @@ router.route("/change-password").patch(
 
 // Account management
 router.route("/forgot-password").post(validateForgotPassword, forgotPassword);
+router.route("/reset-password/:resetToken").post(validateResetPassword, resetPassword);
 
 
 

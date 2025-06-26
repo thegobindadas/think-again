@@ -223,10 +223,6 @@ export const changeUserPassword = catchAsync(async (req, res) => {
 });
 
 
-
-
-
-
 /**
  * Request password reset
  * @route POST /api/v1/users/forgot-password
@@ -275,6 +271,47 @@ export const forgotPassword = catchAsync(async (req, res) => {
 
 
 
+/**
+ * Reset password
+ * @route POST /api/v1/users/reset-password/:token
+ */
+export const resetPassword = catchAsync(async (req, res) => {
+
+  const { resetToken } = req.params;
+  const { newPassword, confirmPassword } = req.body;
+
+  if (newPassword !== confirmPassword) {
+    throw new AppError("New password and confirm password should be same", 400);
+  }
+
+
+  const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+
+  const user = await User.findOne({
+    resetPasswordToken: hashedToken,
+    resetPasswordExpire: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new AppError("Token is invalid or expired", 489)
+  }
+
+
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpire = undefined;
+
+  user.password = newPassword;
+  await user.save({ validateBeforeSave: false });
+
+
+
+  return res.status(200).json({
+    message: "Password reset successfully",
+    success: true
+  })
+
+});
 
 
 
