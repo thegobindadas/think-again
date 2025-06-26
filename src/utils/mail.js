@@ -52,3 +52,46 @@ export const sendEmail = async (options) => {
         throw new AppError(error?.message || "Failed to send reset-password link", 500)
     }
 }
+
+
+export const forgotPasswordMailgenContent = (name, passwordResetUrl) => {
+    return {
+        body: {
+            name: name,
+            intro: "We received a request to reset your password for your learning account.",
+            action: {
+                instructions: "Click the button below to create a new password. This link will expire in 24 hours for security reasons:",
+                button: {
+                    color: "#4F46E5", // Modern indigo color - professional and trustworthy
+                    text: "Reset Your Password",
+                    link: passwordResetUrl,
+                },
+            },
+            table: {
+                data: [
+                    {
+                        item: "Reset Link Valid For:",
+                        description: "24 hours from now"
+                    },
+                    {
+                        item: "Account Security:",
+                        description: "Your current password remains active until reset"
+                    }
+                ],
+                columns: {
+                    // Optionally, customize the column widths
+                    customWidth: {
+                        item: "30%",
+                        description: "70%"
+                    }
+                }
+            },
+            outro: [
+                "If you didn't request this password reset, please ignore this email or contact our support team if you have concerns about your account security.",
+                "For your security, never share your login credentials with anyone. Our team will never ask for your password via email.",
+                "Need help? Visit our Help Center or reply to this email - our support team is here to assist you with your learning journey."
+            ],
+            signature: "Happy Learning!"
+        }
+    };
+};
