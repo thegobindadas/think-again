@@ -8,6 +8,7 @@ import {
     changeUserPassword,
     forgotPassword,
     resetPassword,
+    deleteUserAccount
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { 
@@ -52,6 +53,9 @@ router.route("/change-password").patch(
 router.route("/forgot-password").post(validateForgotPassword, forgotPassword);
 router.route("/reset-password/:resetToken").post(validateResetPassword, resetPassword);
 
+
+// Account management
+router.route("/account").delete(isAuthenticated, deleteUserAccount);
 
 
 

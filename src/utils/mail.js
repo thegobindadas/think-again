@@ -1,6 +1,6 @@
 import nodemailer from "nodemailer";
 import Mailgen from "mailgen";
-import { AppError } from "../middleware/error.middleware";
+import { AppError } from "../middleware/error.middleware.js";
 
 
 

@@ -1,8 +1,8 @@
 import Razorpay from "razorpay";
-import { User } from "../models/user.model";
-import { Course } from "../models/course.model";
-import { CoursePurchase } from "../models/coursePurchase.model";
-import { AppError } from "../middleware/error.middleware";
+import { User } from "../models/user.model.js";
+import { Course } from "../models/course.model.js";
+import { CoursePurchase } from "../models/coursePurchase.model.js";
+import { AppError } from "../middleware/error.middleware.js";
 import crypto from "crypto";
 
 

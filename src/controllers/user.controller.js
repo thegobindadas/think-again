@@ -1,9 +1,9 @@
-import { catchAsync } from "../middleware/error.middleware";
-import { AppError } from "../middleware/error.middleware";
-import { User } from "../models/user.model";
-import { generateToken } from "../utils/generateToken";
-import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary";
-import { sendEmail, forgotPasswordMailgenContent, passwordResetConfirmationMailgenContent } from "../utils/mail";
+import { catchAsync } from "../middleware/error.middleware.js";
+import { AppError } from "../middleware/error.middleware.js";
+import { User } from "../models/user.model.js";
+import { generateToken } from "../utils/generateToken.js";
+import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary.js";
+import { sendEmail, forgotPasswordMailgenContent, passwordResetConfirmationMailgenContent } from "../utils/mail.js";
 import crypto from "crypto";
 
 

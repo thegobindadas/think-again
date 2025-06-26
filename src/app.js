@@ -1,8 +1,7 @@
 import express from "express";
 import helmet from "helmet";
-import mongoSanitize from "express-mongo-sanitize";
 import hpp from "hpp";
-import xss from "xss-clean";
+import { safeSanitize, xssSanitize} from "./middleware/sanitize.middleware.js"
 import rateLimit from "express-rate-limit";
 import morgan from "morgan";
 import cookieParser from "cookie-parser";
@@ -35,9 +34,9 @@ const limiter = rateLimit({
 
 // Security middleware
 app.use(helmet());
-app.use(mongoSanitize());
+app.use(safeSanitize);
 app.use(hpp());
-app.use(xss());
+app.use(xssSanitize);
 app.use("/api", limiter); // Apply rate limiter to all API requests
 
 
