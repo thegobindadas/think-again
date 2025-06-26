@@ -3,7 +3,7 @@ import { AppError } from "../middleware/error.middleware";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
 import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary";
-import { sendEmail, forgotPasswordMailgenContent } from "../utils/mail";
+import { sendEmail, forgotPasswordMailgenContent, passwordResetConfirmationMailgenContent } from "../utils/mail";
 import crypto from "crypto";
 
 
@@ -303,6 +303,13 @@ export const resetPassword = catchAsync(async (req, res) => {
 
   user.password = newPassword;
   await user.save({ validateBeforeSave: false });
+
+
+  await sendEmail({
+    email: user?.email,
+    subject: "Password reset successful",
+    mailgenContent: passwordResetConfirmationMailgenContent(user.name, Date.now()),
+  });
 
 
 

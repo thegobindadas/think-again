@@ -95,3 +95,65 @@ export const forgotPasswordMailgenContent = (name, passwordResetUrl) => {
         }
     };
 };
+
+
+export const passwordResetConfirmationMailgenContent = (name, resetTimestamp, userAgent, ipAddress) => {
+
+    const resetDate = new Date(resetTimestamp).toLocaleString('en-US', {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZoneName: 'short'
+    });
+
+    return {
+        body: {
+            name: name,
+            intro: "Your password has been successfully reset! Your learning account is now secure with your new password.",
+            table: {
+                data: [
+                    {
+                        item: "✅ Password Reset:",
+                        description: "Completed successfully"
+                    },
+                    {
+                        item: "📅 Date & Time:",
+                        description: resetDate
+                    },
+                    {
+                        item: "🌐 Device Info:",
+                        description: userAgent || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36" || "Not available"
+                    },
+                    {
+                        item: "📍 Location:",
+                        description: ipAddress ? `IP: ${ipAddress}` : "Secure connection verified"
+                    }
+                ],
+                columns: {
+                    customWidth: {
+                        item: "30%",
+                        description: "70%"
+                    }
+                }
+            },
+            action: {
+                instructions: "Ready to continue your learning journey? Access your dashboard now:",
+                button: {
+                    color: "#10B981", // Success green color
+                    text: "Go to Learning Dashboard",
+                    link: "https://yourlms.com/dashboard",
+                },
+            },
+            outro: [
+                "🔐 **Security Reminder**: Your old password is no longer valid. Keep your new password secure and don't share it with anyone.",
+                "🚨 **Didn't make this change?** If you didn't reset your password, please contact our security team immediately at security@yourlms.com",
+                "💡 **Stay Secure**: Consider enabling two-factor authentication in your account settings for enhanced protection.",
+                "📚 **What's Next?** All your courses, progress, and certificates remain intact. Continue learning where you left off!"
+            ],
+            signature: "Welcome back to your learning journey!"
+        }
+    };
+};
