@@ -116,3 +116,8 @@ export const validatePasswordChange = validate([
             return true;
         })
 ]);
+
+
+export const validateForgotPassword = validate([
+    commonValidations.email
+]);

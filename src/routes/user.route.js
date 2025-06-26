@@ -1,15 +1,20 @@
 import { Router } from "express";
 import {
-    authenticateUser,
-    changeUserPassword,
     createUserAccount,
-    deleteUserAccount,
-    getCurrentUserProfile,
+    authenticateUser,
     signOutUser,
-    updateUserProfile
+    getCurrentUserProfile,
+    updateUserProfile,
+    changeUserPassword,
+    forgotPassword,
 } from "../controllers/user.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
-import { validateSignup, validateSignin, validatePasswordChange } from "../middleware/validation.middleware.js";
+import { 
+    validateSignup, 
+    validateSignin, 
+    validatePasswordChange,
+    validateForgotPassword,
+} from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
 
@@ -34,11 +39,15 @@ router.route("/profile").patch(
 
 
 // Password management
-router.patch("/change-password",
+router.route("/change-password").patch(
     isAuthenticated,
     validatePasswordChange,
     changeUserPassword
 );
+
+
+// Account management
+router.route("/forgot-password").post(validateForgotPassword, forgotPassword);
 
 
 

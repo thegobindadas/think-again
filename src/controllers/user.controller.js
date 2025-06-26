@@ -3,6 +3,8 @@ import { AppError } from "../middleware/error.middleware";
 import { User } from "../models/user.model";
 import { generateToken } from "../utils/generateToken";
 import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary";
+import { sendEmail, forgotPasswordMailgenContent } from "../utils/mail";
+import crypto from "crypto";
 
 
 
@@ -230,16 +232,62 @@ export const changeUserPassword = catchAsync(async (req, res) => {
  * @route POST /api/v1/users/forgot-password
  */
 export const forgotPassword = catchAsync(async (req, res) => {
-  // TODO: Implement forgot password functionality
+
+  const { email } = req.body;
+
+  const user = await User.findOne({ email })
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+
+  const resetToken = await user.getResetPasswordToken()
+
+  await user.save({ validateBeforeSave: false })
+
+
+
+  const resetPasswordUrl = `${process.env.FORGOT_PASSWORD_REDIRECT_URL}?token=${resetToken}`
+
+  try {
+    await sendEmail({
+      email: user?.email,
+      subject: "Password reset request",
+      mailgenContent: forgotPasswordMailgenContent(user.name, resetPasswordUrl),
+    });
+ 
+ 
+    return res.status(200).json({
+      message: "Password reset mail has been sent on your mail id",
+      success: true
+    })
+
+  } catch (error) {
+
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    throw new AppError("Failed to send email. Try again later.", 500);
+  }
 });
 
-/**
- * Reset password
- * @route POST /api/v1/users/reset-password/:token
- */
-export const resetPassword = catchAsync(async (req, res) => {
-  // TODO: Implement reset password functionality
-});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /**
  * Delete user account
