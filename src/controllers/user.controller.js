@@ -125,7 +125,11 @@ export const getCurrentUserProfile = catchAsync(async (req, res) => {
 export const updateUserProfile = catchAsync(async (req, res) => {
   
   const { name, bio } = req.body
-  const updatedData = { name, bio }
+  const updatedData = { bio }
+
+  if (name) {
+    updatedData.name = name
+  }
 
 
   const user = await User.findById(req.id);
@@ -149,12 +153,11 @@ export const updateUserProfile = catchAsync(async (req, res) => {
     let deleteResponse;
     if (user.avatar && user.avatar !== "default-avatar.png" ) {
       deleteResponse = await deleteMediaFromCloudinary(user.avatarPublicId)
+
+      if (deleteResponse.result !== "ok") {
+        throw new AppError("Failed to delete old profile picture", 500);
+      }
     }
-    
-    if (deleteResponse.result !== "ok") {
-      throw new AppError("Failed to delete old profile picture", 500);
-    }
-    
   }
 
 
