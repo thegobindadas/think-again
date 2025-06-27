@@ -92,6 +92,12 @@ export const validateSignin = validate([
         .withMessage("Password is required")
 ]);
 
+export const validateEmailVerification = validate([
+    param("verificationToken")
+        .notEmpty()
+        .withMessage("Verification token is required"),
+]);
+
 export const validatePasswordChange = validate([
     body("currentPassword")
         .notEmpty()

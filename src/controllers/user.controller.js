@@ -3,14 +3,20 @@ import { AppError } from "../middleware/error.middleware.js";
 import { User } from "../models/user.model.js";
 import { generateToken } from "../utils/generateToken.js";
 import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary.js";
-import { sendEmail, forgotPasswordMailgenContent, passwordResetConfirmationMailgenContent } from "../utils/mail.js";
+import { 
+  sendEmail, 
+  forgotPasswordMailgenContent, 
+  passwordResetConfirmationMailgenContent, 
+  verifyEmailMailgenContent,
+  emailVerificationSuccessMailgenContent,
+} from "../utils/mail.js";
 import crypto from "crypto";
 
 
 
 /**
  * Create a new user account
- * @route POST /api/v1/users/signup
+ * @route POST /api/v1/user/signup
  */
 export const createUserAccount = catchAsync(async (req, res) => {
 
@@ -32,17 +38,45 @@ export const createUserAccount = catchAsync(async (req, res) => {
   });
 
   if (!user) {
-    throw new AppError("Failed to create user. Please try again later", 500);
+    throw new AppError("Failed to register user. Please try again later", 500);
   }
 
+
+  const verificationToken = await user.getEmailVerificationToken();
+
   await user.updateLastActiveAt();
-  generateToken(res, user, "User created successfully");
+
+  await user.save({ validateBeforeSave: false });
+
+
+  const verificationUrl =  `${req.protocol}://${req.get("host")}/api/v1/user/verify-email/${verificationToken}`
+
+  try {
+    
+    await sendEmail({
+      email: user?.email,
+      subject: "Please verify your email",
+      mailgenContent: verifyEmailMailgenContent(user.name, verificationUrl),
+    });
+
+
+    const createdUser = await User.findById(user._id)
+
+    generateToken(res, createdUser, "Users registered successfully and verification email has been sent on your email.");
+
+  } catch (error) {
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiry = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    throw new AppError(error.message || "Failed to send verification email. Please try again later", 500);
+  }
 });
 
 
 /**
  * Authenticate user and get token
- * @route POST /api/v1/users/signin
+ * @route POST /api/v1/user/signin
  */
 export const authenticateUser = catchAsync(async (req, res) => {
 
@@ -71,7 +105,7 @@ export const authenticateUser = catchAsync(async (req, res) => {
 
 /**
  * Sign out user and clear cookie
- * @route POST /api/v1/users/signout
+ * @route POST /api/v1/user/signout
  */
 export const signOutUser = catchAsync(async (_, res) => {
   
@@ -91,8 +125,102 @@ export const signOutUser = catchAsync(async (_, res) => {
 
 
 /**
+ * Verify user email
+ * @route POST /api/v1/user/verify-email/:verificationToken
+ */
+export const verifyEmail = catchAsync(async (req, res) => {
+
+  const { verificationToken } = req.params;
+
+  const hashedToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+
+
+  const user = await User.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpiry: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new AppError("Token is invalid or expired", 489)
+  }
+
+
+  user.emailVerificationToken = undefined;
+  user.emailVerificationExpiry = undefined;
+
+  user.isEmailVerified = true;
+  await user.save({ validateBeforeSave: false });
+
+
+  // send email to user that email has been verified
+  await sendEmail({
+    email: user?.email,
+    subject: "Email verification successful",
+    mailgenContent: emailVerificationSuccessMailgenContent(user.name),
+  });
+
+  
+
+  return res.status(200).json({
+    message: "Email verified successfully",
+    success: true
+  })
+
+});
+
+
+/**
+ * Resend verify user email
+ * @route POST /api/v1/user/resend-email-verification
+ */
+export const resendEmailVerification = catchAsync(async (req, res) => {
+
+  const user = await User.findById(req.id);
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (user.isEmailVerified) {
+    throw new AppError("Email is already verified. You can login now", 400);
+  }
+
+
+  const verificationToken = await user.getEmailVerificationToken()
+
+  await user.save({ validateBeforeSave: false });
+
+
+  const verificationUrl =  `${req.protocol}://${req.get("host")}/api/v1/user/verify-email/${verificationToken}`
+
+  try {
+    
+    await sendEmail({
+      email: user?.email,
+      subject: "Please verify your email",
+      mailgenContent: verifyEmailMailgenContent(user.name, verificationUrl),
+    });
+
+
+    
+    return res.status(200).json({
+      message: "Verification mail has been sent on your mail id",
+      success: true
+    })
+
+  } catch (error) {
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpiry = undefined;
+    await user.save({ validateBeforeSave: false });
+
+    throw new AppError(error.message || "Failed to send verification email. Please try again later", 500);
+  }
+});
+
+
+/**
  * Get current user profile
- * @route GET /api/v1/users/profile
+ * @route GET /api/v1/user/profile
  */
 export const getCurrentUserProfile = catchAsync(async (req, res) => {
   
@@ -120,7 +248,7 @@ export const getCurrentUserProfile = catchAsync(async (req, res) => {
 
 /**
  * Update user profile
- * @route PATCH /api/v1/users/profile
+ * @route PATCH /api/v1/user/profile
  */
 export const updateUserProfile = catchAsync(async (req, res) => {
   
@@ -187,7 +315,7 @@ export const updateUserProfile = catchAsync(async (req, res) => {
 
 /**
  * Change user password
- * @route PATCH /api/v1/users/password
+ * @route PATCH /api/v1/user/password
  */
 export const changeUserPassword = catchAsync(async (req, res) => {
 
@@ -228,7 +356,7 @@ export const changeUserPassword = catchAsync(async (req, res) => {
 
 /**
  * Request password reset
- * @route POST /api/v1/users/forgot-password
+ * @route POST /api/v1/user/forgot-password
  */
 export const forgotPassword = catchAsync(async (req, res) => {
 
@@ -265,7 +393,7 @@ export const forgotPassword = catchAsync(async (req, res) => {
   } catch (error) {
 
     user.resetPasswordToken = undefined;
-    user.resetPasswordExpire = undefined;
+    user.resetPasswordExpiry = undefined;
     await user.save({ validateBeforeSave: false });
 
     throw new AppError("Failed to send email. Try again later.", 500);
@@ -275,7 +403,7 @@ export const forgotPassword = catchAsync(async (req, res) => {
 
 /**
  * Reset password
- * @route POST /api/v1/users/reset-password/:token
+ * @route POST /api/v1/user/reset-password/:token
  */
 export const resetPassword = catchAsync(async (req, res) => {
 
@@ -292,7 +420,7 @@ export const resetPassword = catchAsync(async (req, res) => {
 
   const user = await User.findOne({
     resetPasswordToken: hashedToken,
-    resetPasswordExpire: { $gt: Date.now() },
+    resetPasswordExpiry: { $gt: Date.now() },
   });
 
   if (!user) {
@@ -301,10 +429,10 @@ export const resetPassword = catchAsync(async (req, res) => {
 
 
   user.resetPasswordToken = undefined;
-  user.resetPasswordExpire = undefined;
+  user.resetPasswordExpiry = undefined;
 
   user.password = newPassword;
-  await user.save({ validateBeforeSave: false });
+  await user.save();
 
 
   await sendEmail({
@@ -337,7 +465,7 @@ export const resetPassword = catchAsync(async (req, res) => {
 
 /**
  * Delete user account
- * @route DELETE /api/v1/users/account
+ * @route DELETE /api/v1/user/account
  */
 export const deleteUserAccount = catchAsync(async (req, res) => {
   // TODO: Implement delete user account functionality

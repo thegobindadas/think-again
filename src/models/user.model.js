@@ -60,8 +60,14 @@ const userSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "Course"
         }],
+        isEmailVerified: {
+            type: Boolean,
+            default: false,
+        },
+        emailVerificationToken: String,
+        emailVerificationExpiry: Date,
         resetPasswordToken: String,
-        resetPasswordExpire: Date,
+        resetPasswordExpiry: Date,
         lastActiveAt: {
             type: Date,
             default: Date.now
@@ -99,10 +105,24 @@ userSchema.methods.getResetPasswordToken = function () {
 
     this.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
 
-    this.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 minutes
+    this.resetPasswordExpiry = Date.now() + 15 * 60 * 1000; // 15 minutes
 
 
     return resetToken;
+}
+
+
+// Generate email verification token
+userSchema.methods.getEmailVerificationToken = function () {
+
+    const verificationToken = crypto.randomBytes(20).toString("hex");
+
+    this.emailVerificationToken = crypto.createHash("sha256").update(verificationToken).digest("hex");
+
+    this.emailVerificationExpiry = Date.now() + 60 * 60 * 1000; // 60 minutes
+
+
+    return verificationToken;
 }
 
 

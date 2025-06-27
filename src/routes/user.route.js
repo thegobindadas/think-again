@@ -3,6 +3,8 @@ import {
     createUserAccount,
     authenticateUser,
     signOutUser,
+    verifyEmail,
+    resendEmailVerification,
     getCurrentUserProfile,
     updateUserProfile,
     changeUserPassword,
@@ -13,7 +15,8 @@ import {
 import { isAuthenticated } from "../middleware/auth.middleware.js";
 import { 
     validateSignup, 
-    validateSignin, 
+    validateSignin,
+    validateEmailVerification,
     validatePasswordChange,
     validateForgotPassword,
     validateResetPassword,
@@ -30,6 +33,11 @@ const router = Router();
 router.route("/signup").post(validateSignup, createUserAccount);
 router.route("/signin").post(validateSignin, authenticateUser);
 router.route("/signout").post(signOutUser);
+
+
+// Email verification
+router.route("/verify-email/:verificationToken").get(validateEmailVerification, verifyEmail);
+router.route("/resend-email-verification").post(isAuthenticated, resendEmailVerification);
 
 
 // Profile routes
