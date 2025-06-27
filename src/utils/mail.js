@@ -45,8 +45,7 @@ export const sendEmail = async (options) => {
 
 
 
-        const sendEM = await transporter.sendMail(mail);
-        console.log(sendEM)
+        await transporter.sendMail(mail);
 
     } catch (error) {
         throw new AppError(error?.message || "Failed to send reset-password link", 500)
@@ -54,44 +53,112 @@ export const sendEmail = async (options) => {
 }
 
 
-export const forgotPasswordMailgenContent = (name, passwordResetUrl) => {
+
+export const forgotPasswordMailgenContent = (name, passwordResetUrl, options = {}) => {
+    // Extract optional parameters with defaults
+    const {
+        brandName = "ThinkAgain",
+        supportEmail = "support@thinkagain.app",
+        helpCenterUrl = "https://help.thinkagain.app",
+        securityEmail = "security@thinkagain.app",
+        dashboardUrl = "https://thinkagain.app/dashboard",
+        expirationMinutes = 15,
+        userAgent = null,
+        requestTime = new Date().toLocaleString("en-US", {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
+        })
+    } = options;
+
+
     return {
         body: {
             name: name,
-            intro: "We received a request to reset your password for your learning account.",
+            intro: `We received a secure request to reset the password for your ${brandName} learning account. Your educational journey is important to us, and we're here to help you regain access quickly and safely.`,
+            
             action: {
-                instructions: "Click the button below to create a new password. This link will expire in 24 hours for security reasons:",
+                instructions: `To create a new password and continue your learning experience, click the secure button below. This verification link is valid for ${expirationMinutes} minutes and can only be used once:`,
                 button: {
-                    color: "#4F46E5", // Modern indigo color - professional and trustworthy
-                    text: "Reset Your Password",
+                    color: "#6366F1", // Modern indigo - professional, trustworthy, and accessible
+                    text: "Reset Password Securely",
                     link: passwordResetUrl,
                 },
             },
+
             table: {
                 data: [
                     {
-                        item: "Reset Link Valid For:",
-                        description: "24 hours from now"
+                        item: "🔐 Security Level:",
+                        description: "Enterprise-grade encryption applied"
                     },
                     {
-                        item: "Account Security:",
-                        description: "Your current password remains active until reset"
+                        item: "⏰ Link Expires:",
+                        description: `${expirationMinutes} minutes from request time`
+                    },
+                    {
+                        item: "📅 Request Time:",
+                        description: requestTime
+                    },
+                    {
+                        item: "🛡️ Account Status:",
+                        description: "Remains secure until password is reset"
+                    },
+                    {
+                        item: "📚 Course Access:",
+                        description: "All learning progress and certificates preserved"
                     }
                 ],
                 columns: {
-                    // Optionally, customize the column widths
                     customWidth: {
-                        item: "30%",
-                        description: "70%"
+                        item: "35%",
+                        description: "65%"
+                    },
+                    // Add custom styling for enterprise look
+                    customStyle: {
+                        item: "font-weight: 600; color: #374151;",
+                        description: "color: #6B7280;"
                     }
                 }
             },
+
+            // Alternative access method
+            dictionary: {
+                "Alternative Access": "If the button doesn't work, copy and paste this secure link into your browser:",
+                "Reset Link": passwordResetUrl,
+                "Link Format": "This link is uniquely generated for your account and cannot be shared"
+            },
+
             outro: [
-                "If you didn't request this password reset, please ignore this email or contact our support team if you have concerns about your account security.",
-                "For your security, never share your login credentials with anyone. Our team will never ask for your password via email.",
-                "Need help? Visit our Help Center or reply to this email - our support team is here to assist you with your learning journey."
+                `🚨 **Security Alert**: If you didn't request this password reset, your account remains secure. However, please contact our security team at ${securityEmail} immediately to report this incident.`,
+                
+                `🔒 **Privacy Commitment**: ${brandName} will never ask for your password, payment information, or personal details via email. This reset link is the only secure method we use.`,
+                
+                `💡 **Security Best Practices**: After resetting your password, we recommend:
+                • Enable two-factor authentication in your account settings
+                • Use a unique, strong password with mixed characters
+                • Avoid using the same password across multiple platforms`,
+                
+                `📞 **Need Immediate Help?** Our learner success team is available 24/7:
+                • Email: ${supportEmail}
+                • Help Center: ${helpCenterUrl}
+                • Emergency Security: ${securityEmail}`,
+                
+                `🎓 **Continue Learning**: Once your password is reset, access your dashboard at ${dashboardUrl} to continue your educational journey where you left off.`
             ],
-            signature: "Happy Learning!"
+
+            signature: `Empowering Your Learning Journey,<br/>The ${brandName} Security & Support Team`,
+
+            // Call-to-action for post-reset
+            goToAction: {
+                text: "Visit Learning Dashboard",
+                link: dashboardUrl,
+                description: "Access your courses, track progress, and manage your learning path"
+            }
         }
     };
 };
@@ -144,7 +211,7 @@ export const passwordResetConfirmationMailgenContent = (name, resetTimestamp, us
                 button: {
                     color: "#10B981", // Success green color
                     text: "Go to Learning Dashboard",
-                    link: "https://yourlms.com/dashboard",
+                    link: "https://thinkagain.app/dashboard",
                 },
             },
             outro: [

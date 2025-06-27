@@ -234,10 +234,10 @@ export const forgotPassword = catchAsync(async (req, res) => {
 
   const { email } = req.body;
 
-  const user = await User.findOne({ email })
+  const user = await User.findOne({ email: email.toLowerCase() })
 
   if (!user) {
-    throw new AppError("User not found", 404);
+    throw new AppError("User not found, Please provide a valid email address.", 404);
   }
 
 
@@ -271,7 +271,6 @@ export const forgotPassword = catchAsync(async (req, res) => {
     throw new AppError("Failed to send email. Try again later.", 500);
   }
 });
-
 
 
 /**
