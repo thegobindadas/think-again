@@ -1,3 +1,4 @@
+import { User } from "../models/user.model.js";
 import { Course } from "../models/course.model.js";
 import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary.js";
 import { catchAsync } from "../middleware/error.middleware.js";
@@ -11,7 +12,7 @@ import { AppError } from "../middleware/error.middleware.js";
  */
 export const createNewCourse = catchAsync(async (req, res) => {
   
-  const { title, subtitle, description, category, level="beginner", price=0} = req.body
+  const { title, subtitle, description, category, level="beginner", price=0 } = req.body
 
   const newCourse = { 
     title, 
@@ -51,6 +52,12 @@ export const createNewCourse = catchAsync(async (req, res) => {
     throw new AppError("Failed to create a new course", 500);
   }
 
+
+  // Add course to instructor's created courses
+  await User.findByIdAndUpdate(req.id, {
+    $push: { createdCourses: course._id },
+  });
+
   
 
   return res.status(201).json({
@@ -75,6 +82,11 @@ export const toggleCoursePublishStatus = catchAsync(async (req, res) => {
     throw new AppError("Course not found", 404);
   }
 
+  if (!req.user || course.instructor.toString() !== req.user?._id.toString()) {
+    throw new AppError("You are not authorized to update the publish status", 403)
+  }
+
+
   course.isPublished = !course.isPublished
 
   await course.save()
@@ -84,6 +96,67 @@ export const toggleCoursePublishStatus = catchAsync(async (req, res) => {
   return res.status(200).json({
     data: course,
     message: `Course has been ${course.isPublished ? "published" : "unpublished"} successfully`,
+    success: true
+  })
+});
+
+
+/**
+ * Update course details
+ * @route PATCH /api/v1/courses/:courseId
+ */
+export const updateCourseDetails = catchAsync(async (req, res) => {
+  
+  const { courseId } = req.params
+  const { title, subtitle, description, category, level, price } = req.body;
+  
+  const updatedData = {}
+
+  const course = await Course.findById(courseId)
+
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  if (!req.user || course.instructor.toString() !== req.user?._id.toString()) {
+    throw new AppError("You are not authorized to update this course", 403)
+  }
+
+
+
+  if (req.file) {
+    const uploadResponse = await uploadMediaToCloudinary(req.file.path)
+
+    if (!uploadResponse) {
+      throw new AppError("Failed to upload thumbnail", 500);
+    }
+
+    if (course.thumbnail && course.thumbnailPublicId) {
+      await deleteMediaFromCloudinary(course.thumbnailPublicId)
+    }
+
+
+    updatedData.thumbnail = uploadResponse.secure_url
+    updatedData.thumbnailPublicId = uploadResponse.public_id
+  }
+
+
+  if (title) updatedData.title = title.trim();
+  if (subtitle !== undefined) updatedData.subtitle = subtitle.trim();
+  if (description !== undefined) updatedData.description = description.trim();
+
+  if (category !== undefined) updatedData.category = category
+  if (level !== undefined) updatedData.level = level
+  if (price !== undefined) updatedData.price = price
+
+
+  const updatedCourse = await Course.findByIdAndUpdate(courseId, updatedData, { new: true, runValidators: true })
+
+
+
+  return res.status(200).json({
+    data: updatedCourse,
+    message: "Course updated successfully",
     success: true
   })
 });
@@ -125,13 +198,7 @@ export const getMyCreatedCourses = catchAsync(async (req, res) => {
 });
 
 
-/**
- * Update course details
- * @route PATCH /api/v1/courses/:courseId
- */
-export const updateCourseDetails = catchAsync(async (req, res) => {
-  // TODO: Implement update course details functionality
-});
+
 
 
 /**

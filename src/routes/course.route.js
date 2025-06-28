@@ -14,6 +14,7 @@ import {
 import { 
   validateCreateNewCourse,
   validateCoursePublishStatus,
+  validateUpdateCourseDetails,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
@@ -47,6 +48,7 @@ router
   .patch(
     restrictTo("instructor"),
     upload.single("thumbnail"),
+    validateUpdateCourseDetails,
     updateCourseDetails
   );
 

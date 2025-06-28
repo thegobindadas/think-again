@@ -169,7 +169,7 @@ export const validateCreateNewCourse = validate([
         .optional()
         .trim()
         .isLength({ min: 2, max: 100 })
-        .withMessage("Subtitle must be between 2 and 50 characters"),
+        .withMessage("Subtitle must be between 2 and 100 characters"),
 
     body("description")
         .optional()
@@ -190,10 +190,57 @@ export const validateCreateNewCourse = validate([
         .withMessage("Price must be a positive number"),  
 ]);
 
+
 export const validateCoursePublishStatus = validate([
     param("courseId")
         .notEmpty()
         .withMessage("Course ID is required")
         .isMongoId()
         .withMessage("Invalid course ID format"),
+]);
+
+
+export const validateUpdateCourseDetails = validate([
+    param("courseId")
+        .notEmpty()
+        .withMessage("Course ID is required")
+        .isMongoId()
+        .withMessage("Invalid course ID format"),
+    
+    body("title")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 50 })
+        .withMessage("Title must be between 2 and 50 characters")
+        .matches(/^[a-zA-Z\s]*$/)
+        .withMessage("Title can only contain letters and spaces"),
+
+    body("subtitle")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 100 })
+        .withMessage("Subtitle must be between 2 and 100 characters"),
+
+    body("description")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 1000 })
+        .withMessage("Description must be between 2 and 1000 characters"),
+        
+    body("category")
+        .optional()
+        .isString()
+        .withMessage("Category must be a string")
+        .notEmpty()
+        .withMessage("Category cannot be empty"),
+
+    body("level")
+        .optional()
+        .isIn(["beginner", "intermediate", "advanced"])
+        .withMessage("Invalid level"),
+
+    body("price")
+        .optional()
+        .isFloat({ min: 0 })
+        .withMessage("Price must be a positive number"),  
 ]);
