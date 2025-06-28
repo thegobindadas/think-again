@@ -7,7 +7,7 @@ import { AppError } from "../middleware/error.middleware.js";
 
 /**
  * Create a new course
- * @route POST /api/v1/courses
+ * @route POST /api/v1/course/
  */
 export const createNewCourse = catchAsync(async (req, res) => {
   
@@ -59,6 +59,43 @@ export const createNewCourse = catchAsync(async (req, res) => {
     success: true
   })
 });
+
+
+/**
+ * Toggle course publish status
+ * @route PATCH /api/v1/course/c/:courseId/publish
+ */
+export const toggleCoursePublishStatus = catchAsync(async (req, res) => {
+
+  const { courseId } = req.params
+
+  const course = await Course.findById(courseId)
+
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  course.isPublished = !course.isPublished
+
+  await course.save()
+
+
+
+  return res.status(200).json({
+    data: course,
+    message: `Course has been ${course.isPublished ? "published" : "unpublished"} successfully`,
+    success: true
+  })
+});
+
+
+
+
+
+
+
+
+
 
 
 /**

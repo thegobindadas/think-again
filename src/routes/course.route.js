@@ -2,6 +2,7 @@ import { Router } from "express";
 import { isAuthenticated, restrictTo } from "../middleware/auth.middleware.js";
 import {
   createNewCourse,
+  toggleCoursePublishStatus,
   searchCourses,
   getPublishedCourses,
   getMyCreatedCourses,
@@ -12,6 +13,7 @@ import {
 } from "../controllers/course.controller.js";
 import { 
   validateCreateNewCourse,
+  validateCoursePublishStatus,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
@@ -38,6 +40,7 @@ router
 
 
 // Course details and updates
+router.route("/c/:courseId/publish").patch(restrictTo("instructor"), validateCoursePublishStatus, toggleCoursePublishStatus);
 router
   .route("/c/:courseId")
   .get(getCourseDetails)

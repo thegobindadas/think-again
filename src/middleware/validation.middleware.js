@@ -189,3 +189,9 @@ export const validateCreateNewCourse = validate([
         .isFloat({ min: 0 })
         .withMessage("Price must be a positive number"),  
 ]);
+
+export const validateCoursePublishStatus = validate([
+    param("courseId")
+        .notEmpty()
+        .withMessage("Course ID is required"),
+]);
