@@ -22,7 +22,7 @@ export const isAuthenticated = catchAsync(async (req, res, next) => {
     // Add user ID to request
     req.id = decoded.userId;
 
-    /*
+
     const user = await User.findById(req.id);
 
     if (!user) {
@@ -30,7 +30,7 @@ export const isAuthenticated = catchAsync(async (req, res, next) => {
     }
 
     req.user = user;
-    */
+
 
     next();
 

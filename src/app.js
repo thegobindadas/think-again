@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 
 // import routes
+import mediaRoute from "./routes/media.route.js";
 import userRoute from "./routes/user.route.js";
 import razorpayRoute from "./routes/razorpay.route.js";
 import healthRoute from "./routes/health.route.js";
@@ -75,6 +76,7 @@ app.use(
 
 
 // use routes
+app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/razorpay", razorpayRoute);
 app.use("/health", healthRoute);
