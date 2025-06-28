@@ -153,3 +153,39 @@ export const validateResetPassword = validate([
             return true;
         })
 ]);
+
+
+export const validateCreateNewCourse = validate([
+    body("title")
+        .trim()
+        .notEmpty()
+        .withMessage("Title is required")
+        .isLength({ min: 2, max: 50 })
+        .withMessage("Title must be between 2 and 50 characters")
+        .matches(/^[a-zA-Z\s]*$/)
+        .withMessage("Title can only contain letters and spaces"),
+
+    body("subtitle")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 100 })
+        .withMessage("Subtitle must be between 2 and 50 characters"),
+
+    body("description")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 1000 })
+        .withMessage("Description must be between 2 and 1000 characters"),
+        
+    body("category")
+        .notEmpty()
+        .withMessage("Category is required"),
+
+    body("level")
+        .isIn(["beginner", "intermediate", "advanced"])
+        .withMessage("Invalid level"),
+
+    body("price")
+        .isFloat({ min: 0 })
+        .withMessage("Price must be a positive number"),  
+]);
