@@ -451,22 +451,39 @@ export const resetPassword = catchAsync(async (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 /**
  * Delete user account
  * @route DELETE /api/v1/user/account
  */
 export const deleteUserAccount = catchAsync(async (req, res) => {
-  // TODO: Implement delete user account functionality
+ 
+  const user = await User.findById(req.id)
+
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+    
+
+  let deleteResponse;
+  if (user.avatar && user.avatar !== "default-avatar.png" ) {
+    deleteResponse = await deleteMediaFromCloudinary(user.avatarPublicId)
+
+    if (deleteResponse.result !== "ok") {
+      throw new AppError("Failed to delete old profile picture", 500);
+    }
+  }
+
+
+  const deleteUser = await user.deleteOne();
+
+  if (!deleteUser.acknowledged || deleteUser.deletedCount === 0) {
+    throw new AppError("Failed to delete user account", 500);
+  }
+ 
+
+
+  return res.status(200).json({
+    message: "User account deleted successfully",
+    success: true
+  })
 });
