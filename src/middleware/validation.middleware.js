@@ -193,5 +193,7 @@ export const validateCreateNewCourse = validate([
 export const validateCoursePublishStatus = validate([
     param("courseId")
         .notEmpty()
-        .withMessage("Course ID is required"),
+        .withMessage("Course ID is required")
+        .isMongoId()
+        .withMessage("Invalid course ID format"),
 ]);
