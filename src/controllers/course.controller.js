@@ -323,21 +323,82 @@ export const getCoursesByInstructor = catchAsync(async (req, res) => {
 });
 
 
-
-
-
-
-
-
-
-
 /**
  * Search courses with filters
  * @route GET /api/v1/courses/search
  */
 export const searchCourses = catchAsync(async (req, res) => {
-  // TODO: Implement search courses functionality
+  const {
+    query = "",
+    categories = [],
+    level,
+    priceRange,
+    sortBy = "newest",
+  } = req.query;
+  
+
+  // Create search query
+  const searchCriteria = {
+    isPublished: true,
+    $or: [
+      { title: { $regex: query, $options: "i" } },
+      { subtitle: { $regex: query, $options: "i" } },
+      { description: { $regex: query, $options: "i" } },
+    ],
+  };
+
+    
+  // Apply filters
+  if (categories.length > 0) {
+    searchCriteria.category = { $in: categories };
+  }
+
+  if (level) {
+    searchCriteria.level = level;
+  }
+
+  if (priceRange) {
+    const [min, max] = priceRange.split("-");
+    searchCriteria.price = { $gte: min || 0, $lte: max || Infinity };
+  }
+  
+
+  // Define sorting
+  const sortOptions = {};
+  switch (sortBy) {
+    case "price-low":
+      sortOptions.price = 1;
+      break;
+    case "price-high":
+      sortOptions.price = -1;
+      break;
+    case "oldest":
+      sortOptions.createdAt = 1;
+      break;
+    default:
+      sortOptions.createdAt = -1;
+  }
+  
+
+  const courses = await Course.find(searchCriteria)
+    .populate({
+      path: "instructor",
+      select: "name avatar",
+    })
+    .sort(sortOptions);
+
+
+
+  res.status(200).json({
+    data: courses,
+    count: courses.length,
+    message: "Courses fetched successfully",
+    success: true,
+  });
 });
+
+
+
 
 
 /**
