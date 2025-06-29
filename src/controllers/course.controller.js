@@ -162,6 +162,25 @@ export const updateCourseDetails = catchAsync(async (req, res) => {
 });
 
 
+/**
+ * Get courses created by the current user
+ * @route GET /api/v1/courses/my-courses
+ */
+export const getMyCreatedCourses = catchAsync(async (req, res) => {
+  
+  const courses = await Course.find({ instructor: req.id }).select(
+    "title subtitle description category level price thumbnail isPublished totalLectures totalDuration averageRating numOfRatings"
+  )
+
+
+
+  return res.status(200).json({
+    data: courses.length > 0 ? courses : [],
+    message: courses.length > 0 ? "Courses fetched successfully" : "You have not created any course yet",
+    success: true
+  })
+
+});
 
 
 
@@ -189,13 +208,7 @@ export const getPublishedCourses = catchAsync(async (req, res) => {
 });
 
 
-/**
- * Get courses created by the current user
- * @route GET /api/v1/courses/my-courses
- */
-export const getMyCreatedCourses = catchAsync(async (req, res) => {
-  // TODO: Implement get my created courses functionality
-});
+
 
 
 

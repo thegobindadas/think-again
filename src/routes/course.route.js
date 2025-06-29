@@ -3,10 +3,10 @@ import { isAuthenticated, restrictTo } from "../middleware/auth.middleware.js";
 import {
   createNewCourse,
   toggleCoursePublishStatus,
+  updateCourseDetails,
+  getMyCreatedCourses,
   searchCourses,
   getPublishedCourses,
-  getMyCreatedCourses,
-  updateCourseDetails,
   getCourseDetails,
   addLectureToCourse,
   getCourseLectures,
