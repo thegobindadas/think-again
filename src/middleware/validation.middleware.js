@@ -244,3 +244,8 @@ export const validateUpdateCourseDetails = validate([
         .isFloat({ min: 0 })
         .withMessage("Price must be a positive number"),  
 ]);
+
+
+export const validateToGetPublishedCourses = validate([
+    commonValidations.pagination
+]);

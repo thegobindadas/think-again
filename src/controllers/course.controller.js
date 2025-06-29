@@ -183,6 +183,42 @@ export const getMyCreatedCourses = catchAsync(async (req, res) => {
 });
 
 
+/**
+ * Get all published courses
+ * @route GET /api/v1/courses/published
+ */
+export const getPublishedCourses = catchAsync(async (req, res) => {
+
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+
+  const [courses, totalCourses] = await Promise.all([
+    Course.find({ isPublished: true })
+    .populate({
+      path: "instructor",
+      select: "name avatar"
+    })
+    .sort({ createdAt: -1})
+    .skip(skip)
+    .limit(limit),
+    Course.countDocuments({ isPublished: true })
+  ])
+
+
+
+  return res.status(200).json({
+    data: courses.length > 0 ? courses : [],
+    pagination: {
+      page,
+      limit,
+      total: totalCourses,
+      pages: Math.ceil(totalCourses / limit)
+    },
+    message: courses.length > 0 ? "Courses fetched successfully" : "No published courses found",
+    success: true
+  })
+});
 
 
 
@@ -197,22 +233,6 @@ export const getMyCreatedCourses = catchAsync(async (req, res) => {
 export const searchCourses = catchAsync(async (req, res) => {
   // TODO: Implement search courses functionality
 });
-
-
-/**
- * Get all published courses
- * @route GET /api/v1/courses/published
- */
-export const getPublishedCourses = catchAsync(async (req, res) => {
-  // TODO: Implement get published courses functionality
-});
-
-
-
-
-
-
-
 
 /**
  * Get course by ID

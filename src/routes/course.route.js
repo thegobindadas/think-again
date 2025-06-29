@@ -5,8 +5,8 @@ import {
   toggleCoursePublishStatus,
   updateCourseDetails,
   getMyCreatedCourses,
-  searchCourses,
   getPublishedCourses,
+  searchCourses,
   getCourseDetails,
   addLectureToCourse,
   getCourseLectures,
@@ -15,6 +15,7 @@ import {
   validateCreateNewCourse,
   validateCoursePublishStatus,
   validateUpdateCourseDetails,
+  validateToGetPublishedCourses,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
@@ -25,7 +26,7 @@ const router = Router();
 
 
 // Public routes
-router.get("/published", getPublishedCourses);
+router.get("/published", validateToGetPublishedCourses, getPublishedCourses);
 router.get("/search", searchCourses);
 
 
