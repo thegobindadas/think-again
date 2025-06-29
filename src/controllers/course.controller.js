@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import { Course } from "../models/course.model.js";
+import { Review } from "../models/review.model.js";
 import { uploadMediaToCloudinary, deleteMediaFromCloudinary } from "../utils/cloudinary.js";
 import { catchAsync } from "../middleware/error.middleware.js";
 import { AppError } from "../middleware/error.middleware.js";
@@ -221,6 +222,48 @@ export const getPublishedCourses = catchAsync(async (req, res) => {
 });
 
 
+/**
+ * Get course by ID
+ * @route GET /api/v1/courses/:courseId
+ */
+export const getCourseDetails = catchAsync(async (req, res) => {
+
+  const { courseId } = req.params
+
+  const course = await Course.findById(courseId)
+    .populate({
+      path: "instructor",
+      select: "name avatar bio"
+    })
+    .populate({
+      path: "lectures",
+      select: "title videoUrl duration isPreview order"
+    })
+
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+
+  const reviews = await Review.find({ course: courseId })
+    .populate({
+      path: "user",
+      select: "name avatar"
+    })
+
+  
+
+  return res.status(200).json({
+    data: {
+      ...course.toJSON(),
+      reviews
+    },
+    message: "Course fetched successfully",
+    success: true
+  })
+});
+
+
 
 
 
@@ -232,14 +275,6 @@ export const getPublishedCourses = catchAsync(async (req, res) => {
  */
 export const searchCourses = catchAsync(async (req, res) => {
   // TODO: Implement search courses functionality
-});
-
-/**
- * Get course by ID
- * @route GET /api/v1/courses/:courseId
- */
-export const getCourseDetails = catchAsync(async (req, res) => {
-  // TODO: Implement get course details functionality
 });
 
 

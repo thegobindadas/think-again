@@ -249,3 +249,8 @@ export const validateUpdateCourseDetails = validate([
 export const validateToGetPublishedCourses = validate([
     commonValidations.pagination
 ]);
+
+
+export const validateToGetCourseDetails = validate([
+    commonValidations.objectId("courseId")
+])

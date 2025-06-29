@@ -6,8 +6,8 @@ import {
   updateCourseDetails,
   getMyCreatedCourses,
   getPublishedCourses,
-  searchCourses,
   getCourseDetails,
+  searchCourses,
   addLectureToCourse,
   getCourseLectures,
 } from "../controllers/course.controller.js";
@@ -16,6 +16,7 @@ import {
   validateCoursePublishStatus,
   validateUpdateCourseDetails,
   validateToGetPublishedCourses,
+  validateToGetCourseDetails,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
@@ -45,7 +46,7 @@ router
 router.route("/c/:courseId/publish").patch(restrictTo("instructor"), validateCoursePublishStatus, toggleCoursePublishStatus);
 router
   .route("/c/:courseId")
-  .get(getCourseDetails)
+  .get(validateToGetCourseDetails, getCourseDetails)
   .patch(
     restrictTo("instructor"),
     upload.single("thumbnail"),
