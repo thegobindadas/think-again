@@ -7,6 +7,7 @@ import {
   getMyCreatedCourses,
   getPublishedCourses,
   getCourseDetails,
+  getCourseEnrolledStudents,
   searchCourses,
   addLectureToCourse,
   getCourseLectures,
@@ -17,6 +18,7 @@ import {
   validateUpdateCourseDetails,
   validateToGetPublishedCourses,
   validateToGetCourseDetails,
+  validateToGetCourseEnrolledStudents,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 
@@ -44,6 +46,9 @@ router
 
 // Course details and updates
 router.route("/c/:courseId/publish").patch(restrictTo("instructor"), validateCoursePublishStatus, toggleCoursePublishStatus);
+
+router.route("/c/:courseId/students").get(restrictTo("instructor"), validateToGetCourseEnrolledStudents, getCourseEnrolledStudents);
+
 router
   .route("/c/:courseId")
   .get(validateToGetCourseDetails, getCourseDetails)

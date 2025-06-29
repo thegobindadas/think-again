@@ -254,3 +254,8 @@ export const validateToGetPublishedCourses = validate([
 export const validateToGetCourseDetails = validate([
     commonValidations.objectId("courseId")
 ])
+
+
+export const validateToGetCourseEnrolledStudents = validate([
+    commonValidations.objectId("courseId")
+])

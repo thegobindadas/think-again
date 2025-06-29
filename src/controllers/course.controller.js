@@ -264,6 +264,45 @@ export const getCourseDetails = catchAsync(async (req, res) => {
 });
 
 
+/**
+ * Search courses with filters
+ * @route GET /api/v1/courses/c/:courseId/students
+ */
+export const getCourseEnrolledStudents = catchAsync(async (req, res) => {
+  
+  const { courseId } = req.params
+
+  const course = await Course.findById(courseId)
+    .populate({
+      path: "enrolledStudents",
+      select: "name avatar"
+    })
+
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+  if (course.instructor.toString() !== req.user._id.toString()) {
+    throw new AppError("You are not authorized to fetch enrolled students", 403)
+  }
+
+
+
+  return res.status(200).json({
+    data: {
+      enrolledStudents: course.enrolledStudents.length > 0 ? course.enrolledStudents : [],
+      totalEnrolledStudents: course?.enrolledStudents?.length
+    },
+    message: course.enrolledStudents.length > 0 ? "Students fetched successfully" : "No enrolled students found",
+    success: true
+  })
+});
+
+
+
+
+
+
 
 
 
