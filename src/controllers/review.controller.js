@@ -135,7 +135,7 @@ export const getUserReviews = catchAsync(async (req, res) => {
 
 /**
  * Update a review
- * @route PUT /api/v1/review/:reviewId
+ * @route PATCH /api/v1/review/:reviewId
  */
 export const updateReview = catchAsync(async (req, res) => {
 
@@ -203,7 +203,7 @@ export const deleteReview = catchAsync(async (req, res) => {
 
 /**
  * Get average rating
- * @route GET /api/v1/review/avg/:courseId
+ * @route GET /api/v1/review/c/:courseId/average
  */
 export const getAverageRating = catchAsync(async (req, res) => {
 
