@@ -299,6 +299,29 @@ export const getCourseEnrolledStudents = catchAsync(async (req, res) => {
 });
 
 
+/**
+ * Search courses with filters
+ * @route GET /api/v1/courses/instructor/:instructorId
+ */
+export const getCoursesByInstructor = catchAsync(async (req, res) => {
+  
+  const { instructorId } = req.params
+
+   const courses = await Course.find({ instructor: instructorId })
+    .populate({
+      path: "instructor",
+      select: "name avatar"
+    })
+
+
+
+  return res.status(200).json({
+    data: courses.length > 0 ? courses : [],
+    message: courses.length > 0 ? "Courses fetched successfully" : "No courses associated with the instructor",
+    success: true
+  })
+});
+
 
 
 
