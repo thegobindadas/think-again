@@ -259,3 +259,71 @@ export const validateToGetCourseDetails = validate([
 export const validateToGetCourseEnrolledStudents = validate([
     commonValidations.objectId("courseId")
 ])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Review Validations 
+export const validateCreateReviewInput = validate([
+    commonValidations.objectId("courseId"),
+
+    body("rating")
+        .isInt({ min: 1, max: 5 })
+        .withMessage("Rating must be between 1 and 5"),
+
+    body("comment")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 500 })
+        .withMessage("Comment must be between 2 and 500 characters")
+])
+
+
+export const validateCourseReviewsQuery = validate([
+    commonValidations.objectId("courseId"),
+    commonValidations.pagination 
+])
+
+
+export const validateUserReviewsQuery = validate([
+    commonValidations.objectId("userId"),
+    commonValidations.pagination 
+])
+
+
+export const validateReviewUpdateInput = validate([
+    commonValidations.objectId("reviewId"),
+    
+    body("rating")
+        .optional()
+        .isInt({ min: 1, max: 5 })
+        .withMessage("Rating must be between 1 and 5"),
+
+    body("comment")
+        .optional()
+        .trim()
+        .isLength({ max: 500 })
+        .withMessage("Comment must be at most 500 characters")
+])
+
+
+export const validateReviewDeletion = validate([
+    commonValidations.objectId("reviewId")
+])
+
+
+export const validateAverageRatingQuery = validate([
+    commonValidations.objectId("courseId")
+])
