@@ -19,13 +19,13 @@ const lectureSchema = new mongoose.Schema(
             type: String,
             required: [true, "Video url is required"]
         },
+        videoPublicId: {
+            type: String,
+            required: [true, "Public id is required for video management"]
+        },
         duration: {
             type: Number,
             default: 0
-        },
-        publicId: {
-            type: String,
-            required: [true, "Public id is required for video management"]
         },
         isPreview: {
             type: Boolean,
@@ -34,7 +34,16 @@ const lectureSchema = new mongoose.Schema(
         order: {
             type: Number,
             required: [true, "Lecture order is required"]
-        }
+        },
+        instructor: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: [true, "Course instructor is required"]
+        },
+        isPublished: {
+            type: Boolean,
+            default: false
+        },
     }, 
     { 
         timestamps: true,
@@ -43,6 +52,7 @@ const lectureSchema = new mongoose.Schema(
     }
 )
 
+lectureSchema.index({ order: 1 });
 
 /*
 // Format duration before saving

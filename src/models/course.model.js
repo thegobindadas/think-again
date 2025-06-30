@@ -8,7 +8,7 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: [true, "Course title is required"],
             trim: true,
-            maxLength: [50, "Course title cannot exceed 100 characters"]
+            maxLength: [50, "Course title cannot exceed 50 characters"]
         },
         subtitle: {
             type: String,
@@ -101,6 +101,22 @@ courseSchema.pre("save", function(next) {
 
     next();
 });
+
+
+courseSchema.methods.addLectureAndTotalDuration = async function (lectureId, duration) {
+    
+    if (!mongoose.Types.ObjectId.isValid(lectureId)) {
+        throw new Error("Invalid lecture ID");
+    }
+
+    this.lectures.push(lectureId);
+    this.totalDuration += duration || 0;
+    if (this.lectures) {
+        this.totalLectures = this.lectures.length;
+    }
+
+    return this.save();
+}
 
 
 
