@@ -134,12 +134,12 @@ export const getSingleLecture = catchAsync(async (req, res) => {
             select: "title description videoUrl duration isPreview order instructor",
         })
 
-    if (!course || !course.lectures.length) {
+    if (!course || course?.lectures?.length === 0) {
         throw new AppError("Lecture not found in this course", 404);
     }
 
 
-    const lecture = course.lectures[0];
+    let lecture = course.lectures[0];
 
     // Check if user has access to this lecture
     const isEnrolled = course.isStudentEnrolled(req.id);
@@ -147,10 +147,7 @@ export const getSingleLecture = catchAsync(async (req, res) => {
 
 
     if (!isEnrolled && !isInstructor) {
-        // Only return preview lectures for non-enrolled users
-        if (!lecture.isPreview) {
-            throw new AppError("You are not authorized to access this lecture", 403);
-        }
+        lecture = lecture.isPreview ? lecture : null;
     }
 
 
@@ -278,19 +275,19 @@ export const deleteLecture = catchAsync(async (req, res) => {
     const course = await Course.findById(courseId)
     
     if (!course) {
-        throw new AppError("Course not found in this course", 404);
+        throw new AppError("Course not found", 404);
     }
 
 
     const lecture = await Lecture.findById(lectureId)
 
     if (!lecture) {
-        throw new AppError("Lecture not found in this course", 404);
+        throw new AppError("Lecture not found", 404);
     }
 
 
-    const isCourseInstructor = course.instructor.toString() !== userId;
-    const isLectureInstructor = lecture.instructor.toString() !== userId;
+    const isCourseInstructor = course.instructor.toString() === userId;
+    const isLectureInstructor = lecture.instructor.toString() === userId;
 
     if (!isCourseInstructor || !isLectureInstructor) {
         throw new AppError("You are not authorized to delete this lecture", 403)
@@ -302,17 +299,24 @@ export const deleteLecture = catchAsync(async (req, res) => {
     }
 
 
-    // Remove lecture from course
-    course.lectures = course.lectures.filter(
-        lecId => lecId.toString() !== lectureId
+    const lectureExistsInCourse = course.lectures.some(
+      (lecId) => lecId.toString() === lectureId
     );
-    course.totalLectures = course.lectures.length;
-    course.totalDuration -= lecture.duration || 0;
+
+    if (lectureExistsInCourse) {
+        // Remove lecture from course
+        course.lectures = course.lectures.filter(
+            lecId => lecId.toString() !== lectureId
+        );
+        course.totalLectures = course.lectures.length;
+        course.totalDuration -= lecture.duration || 0;
+    }
+    
     await course.save();
 
 
     // Delete lecture
-    await lecture.remove();
+    await lecture.deleteOne();
 
 
 
