@@ -1,12 +1,14 @@
-import { Lecture } from "../models/lecture.model";
-import { Course } from "../models/course.model";
-import { uploadMediaToCloudinary, deleteVideoFromCloudinary } from "../utils/cloudinary";
+import { Lecture } from "../models/lecture.model.js";
+import { Course } from "../models/course.model.js";
+import { catchAsync } from "../middleware/error.middleware.js";
+import { AppError } from "../middleware/error.middleware.js";
+import { uploadMediaToCloudinary, deleteVideoFromCloudinary } from "../utils/cloudinary.js";
 
 
 
 /**
  * Create a new lecture and add it to a course
- * @route POST /api/v1/course/:courseId/lecture    validateCreateLectureInput
+ * @route POST /api/v1/course/:courseId/lecture/
  */
 export const createLecture = catchAsync(async (req, res) => {
 
@@ -74,7 +76,7 @@ export const createLecture = catchAsync(async (req, res) => {
 
 /**
  * Get course lectures
- * @route GET /api/v1/course/:courseId/lecture    validateGetCourseLecturesParams
+ * @route GET /api/v1/course/:courseId/lecture/
  */
 export const getCourseLectures = catchAsync(async (req, res) => {
 
@@ -118,7 +120,7 @@ export const getCourseLectures = catchAsync(async (req, res) => {
 
 /**
  * Get single lecture
- * @route GET /api/v1/course/:courseId/lecture/:lectureId    validateLectureParam
+ * @route GET /api/v1/course/:courseId/lecture/:lectureId
  */
 export const getSingleLecture = catchAsync(async (req, res) => {
 
@@ -167,7 +169,7 @@ export const getSingleLecture = catchAsync(async (req, res) => {
 
 /**
  * Update lecture
- * @route PATCH /api/v1/course/:courseId/lecture/:lectureId    validateUpdateLectureInput
+ * @route PATCH /api/v1/course/:courseId/lecture/:lectureId
  */
 export const updateLecture = catchAsync(async (req, res) => {
 
@@ -230,8 +232,42 @@ export const updateLecture = catchAsync(async (req, res) => {
 
 
 /**
+ * Update lecture
+ * @route PATCH /api/v1/course/:courseId/lectures/:lectureId/toggle-preview
+ */
+export const toggleLecturePreviewStatus = catchAsync(async (req, res) => {
+
+    const userId = req.id.toString();
+    const { courseId, lectureId } = req.params;
+
+
+    const lecture = await Lecture.findById(lectureId);
+
+    if (!lecture) {
+      throw new AppError("Lecture not found", 404);
+    }
+
+    if (lecture.instructor.toString() !== userId) {
+        throw new AppError("You are not authorized to update this lecture", 403)
+    }
+
+
+    lecture.isPreview = !lecture.isPreview;
+    await lecture.save();
+
+
+
+    res.status(200).json({
+      success: true,
+      message: `Lecture preview status updated to ${lecture.isPreview}`,
+      data: lecture
+    });
+});
+
+
+/**
  * Delete lecture
- * @route DELETE /api/v1/course/:courseId/lecture/:lectureId    validateLectureParam
+ * @route DELETE /api/v1/course/:courseId/lecture/:lectureId
  */
 export const deleteLecture = catchAsync(async (req, res) => {
 
@@ -284,38 +320,4 @@ export const deleteLecture = catchAsync(async (req, res) => {
         message: "Lecture deleted successfully",
         status: "success",
     })
-});
-
-
-/**
- * Update lecture
- * @route PATCH /api/v1/course/:courseId/lectures/:lectureId/toggle-preview    validateLectureParam
- */
-export const toggleLecturePreviewStatus = catchAsync(async (req, res) => {
-
-    const userId = req.id.toString();
-    const { courseId, lectureId } = req.params;
-
-
-    const lecture = await Lecture.findById(lectureId);
-
-    if (!lecture) {
-      throw new AppError("Lecture not found", 404);
-    }
-
-    if (lecture.instructor.toString() !== userId) {
-        throw new AppError("You are not authorized to update this lecture", 403)
-    }
-
-    
-    lecture.isPreview = !lecture.isPreview;
-    await lecture.save();
-
-
-
-    res.status(200).json({
-      success: true,
-      message: `Lecture preview status updated to ${lecture.isPreview}`,
-      data: lecture
-    });
 });

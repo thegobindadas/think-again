@@ -21,10 +21,14 @@ import {
   validateToGetCourseEnrolledStudents,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
+import lectureRoute from "./lecture.route.js";
 
 
 
 const router = Router();
+router.use("/:courseId/lecture", lectureRoute);
+
+
 
 
 
