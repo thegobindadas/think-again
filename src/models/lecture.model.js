@@ -40,10 +40,6 @@ const lectureSchema = new mongoose.Schema(
             ref: "User",
             required: [true, "Course instructor is required"]
         },
-        isPublished: {
-            type: Boolean,
-            default: false
-        },
     }, 
     { 
         timestamps: true,

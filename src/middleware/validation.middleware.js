@@ -304,7 +304,7 @@ export const validateGetCourseLecturesParams = validate([
 ])
 
 
-export const validateGetSingleLectureParams = validate([
+export const validateLectureParam = validate([
     commonValidations.objectId("courseId"),
     commonValidations.objectId("lectureId")
 ])
@@ -330,32 +330,11 @@ export const validateUpdateLectureInput = validate([
         .isLength({ min: 2, max: 500 })
         .withMessage("Description must be between 2 and 500 characters"),
     
-    body("isPreview")
-        .optional()
-        .isBoolean()
-        .withMessage("isPreview must be a boolean value"),
-
     body("order")
         .optional()
         .isInt()
         .withMessage("Order must be an integer"),
-
-    body("isPublished")
-        .optional()
-        .isBoolean()
-        .withMessage("isPublished must be a boolean value")
 ])
-
-
-
-
-
-
-
-
-
-
-
 
 
 

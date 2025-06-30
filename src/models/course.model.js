@@ -80,7 +80,7 @@ const courseSchema = new mongoose.Schema(
             min: 0,
             max: 5
         },
-        numOfRatings: {
+        totalReviews: {
             type: Number,
             default: 0
         }
@@ -101,22 +101,6 @@ courseSchema.pre("save", function(next) {
 
     next();
 });
-
-
-courseSchema.methods.addLectureAndTotalDuration = async function (lectureId, duration) {
-    
-    if (!mongoose.Types.ObjectId.isValid(lectureId)) {
-        throw new Error("Invalid lecture ID");
-    }
-
-    this.lectures.push(lectureId);
-    this.totalDuration += duration || 0;
-    if (this.lectures) {
-        this.totalLectures = this.lectures.length;
-    }
-
-    return this.save();
-}
 
 
 courseSchema.methods.isStudentEnrolled = function (userId) {
