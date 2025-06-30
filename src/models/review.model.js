@@ -20,11 +20,12 @@ const reviewSchema = new mongoose.Schema(
             type: Number,
             required: [true, "Rating is required"],
             min: [1, "Rating must be at least 1"],
-            max: [5, "Ratine cannot be more than 5"],
+            max: [5, "Rating cannot be more than 5"],
         },
         comment: {
             type: String,
             trim: true,
+            maxlength: [500, "Comment cannot exceed 500 characters"]
         },
     }, 
     { 
@@ -34,55 +35,34 @@ const reviewSchema = new mongoose.Schema(
     }
 )
 
+reviewSchema.index({ course: 1, user: 1 }, { unique: true });
+
 
 // Static method to calculate and update average rating
 reviewSchema.statics.calculateAverageRating = async function (courseId) {
-
-    const result = await this.aggregate([
-        { $match: { course: courseId } },
-        {
-            $group: {
-                _id: "$course",
-                averageRating: { $avg: "$rating" },
-                numOfRatings: { $sum: 1 }
+    try {
+        const result = await this.aggregate([
+            { $match: { course: new mongoose.Types.ObjectId(courseId) } },
+            {
+                $group: {
+                    _id: "$course",
+                    averageRating: { $avg: "$rating" },
+                    numOfRatings: { $sum: 1 }
+                }
             }
+        ]);
+    
+    
+        return {
+            averageRating: result.length > 0 ? parseFloat(result[0].averageRating.toFixed(1)) : 0,
+            numOfRatings: result.length > 0 ? result[0].numOfRatings : 0
         }
-    ]);
-
-    if (result.length > 0) {
-        await mongoose.model("Course").findByIdAndUpdate(courseId, {
-            averageRating: result[0].averageRating,
-            numOfRatings: result[0].numOfRatings
-        });
-    } else {
-        await mongoose.model("Course").findByIdAndUpdate(courseId, {
-            averageRating: 0,
-            numOfRatings: 0
-        });
+        
+    } catch (error) {
+        console.error(error);
+        return { averageRating: 0, numOfRatings: 0 }
     }
 };
-
-
-// Recalculate after save
-reviewSchema.post("save", async function () {
-  await this.constructor.calculateAverageRating(this.course);
-});
-
-
-// Recalculate after update
-reviewSchema.post("findOneAndUpdate", async function (doc) {
-    if (doc) {
-        await doc.constructor.calculateAverageRating(doc.course);
-    }
-});
-
-
-// Recalculate after delete
-reviewSchema.post("findOneAndDelete", async function (doc) {
-  if (doc) {
-    await doc.constructor.calculateAverageRating(doc.course);
-  }
-});
 
 
 
