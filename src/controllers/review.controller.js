@@ -22,10 +22,14 @@ export const createReview = catchAsync(async (req, res) => {
     }
 
 
-    const isEnrolled = course.enrolledStudents.includes(req.id)
+    const isEnrolled = course.isStudentEnrolled(req.id)
 
     if (!isEnrolled) {
         throw new AppError("You are not authorized to review this course", 403);
+    }
+
+    if (course.instructor.toString() === req.id.toString()) {
+        throw new AppError("You cannot review your own course", 400);
     }
 
 
@@ -42,6 +46,10 @@ export const createReview = catchAsync(async (req, res) => {
         rating,
         comment: comment || ""
     })
+
+    if (!review) {
+        throw new AppError("Failed to create review", 500);
+    }
 
 
 
@@ -149,7 +157,7 @@ export const updateReview = catchAsync(async (req, res) => {
         throw new AppError("Review not found", 404);
     }
 
-    if (review.user.toString() !== req.id) {
+    if (review.user.toString() !== req.id.toString()) {
         throw new AppError("You are not authorized to update this review", 403);
     }
 
@@ -165,37 +173,6 @@ export const updateReview = catchAsync(async (req, res) => {
     return res.status(200).json({
         data: review,
         message: "Review updated successfully",
-        success: true
-    })
-});
-
-
-/**
- * Delete a review
- * @route DELETE /api/v1/review/:reviewId
- */
-export const deleteReview = catchAsync(async (req, res) => {
-
-    const { reviewId } = req.params
-
-
-    const review = await Review.findById(reviewId)
-
-    if (!review) {
-        throw new AppError("Review not found", 404);
-    }
-
-    if (review.user.toString() !== req.id) {
-        throw new AppError("You are not authorized to delete this review", 403);
-    }
-
-
-    await review.deleteOne()
-
-
-
-    return res.status(200).json({
-        message: "Review deleted successfully",
         success: true
     })
 });
@@ -223,8 +200,41 @@ export const getAverageRating = catchAsync(async (req, res) => {
     
 
     return res.status(200).json({
-        data: result[0] || { averageRating: 0, totalReviews: 0 },
+        data: {
+            averageRating: result.length > 0 ? parseFloat(result[0].averageRating.toFixed(1)) : 0,
+            totalReviews: result.length > 0 ? result[0].totalReviews : 0
+        },
         message: "Average rating fetched successfully",
+        success: true
+    })
+});
+
+
+/**
+ * Delete a review
+ * @route DELETE /api/v1/review/:reviewId
+ */
+export const deleteReview = catchAsync(async (req, res) => {
+
+    const { reviewId } = req.params
+
+    const review = await Review.findById(reviewId)
+
+    if (!review) {
+        throw new AppError("Review not found", 404);
+    }
+
+    if (review.user.toString() !== req.id.toString()) {
+        throw new AppError("You are not authorized to delete this review", 403);
+    }
+
+
+    await review.remove()
+
+
+
+    return res.status(200).json({
+        message: "Review deleted successfully",
         success: true
     })
 });

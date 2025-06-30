@@ -119,5 +119,12 @@ courseSchema.methods.addLectureAndTotalDuration = async function (lectureId, dur
 }
 
 
+courseSchema.methods.isStudentEnrolled = function (userId) {
+    return this.enrolledStudents.some(studentId =>
+        studentId.toString() === userId.toString()
+    );
+};
+
+
 
 export const Course = mongoose.model("Course", courseSchema)

@@ -268,6 +268,90 @@ export const validateToGetCourseEnrolledStudents = validate([
 
 
 
+// Lecturer Validations
+export const validateCreateLectureInput = validate([
+    commonValidations.objectId("courseId"),
+
+    body("title")
+        .trim()
+        .notEmpty()
+        .withMessage("Title is required")
+        .isLength({ min: 2, max: 100 })
+        .withMessage("Title must be between 2 and 100 characters")
+        .matches(/^[a-zA-Z0-9.,!?'"()\-:; ]{5,100}$/)
+        .withMessage("Title can only contain alphanumeric characters, punctuation marks, and spaces"),
+    
+    body("description")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 500 })
+        .withMessage("Description must be between 2 and 500 characters"),
+    
+    body("isPreview")
+        .optional()
+        .isBoolean()
+        .withMessage("isPreview must be a boolean value"),
+
+    body("order")
+        .optional()
+        .isInt()
+        .withMessage("Order must be an integer")
+])
+
+
+export const validateGetCourseLecturesParams = validate([
+    commonValidations.objectId("courseId")
+])
+
+
+export const validateGetSingleLectureParams = validate([
+    commonValidations.objectId("courseId"),
+    commonValidations.objectId("lectureId")
+])
+
+
+export const validateUpdateLectureInput = validate([
+    commonValidations.objectId("courseId"),
+    commonValidations.objectId("lectureId"),
+
+    body("title")
+        .optional()
+        .trim()
+        .notEmpty()
+        .withMessage("Title is required")
+        .isLength({ min: 2, max: 100 })
+        .withMessage("Title must be between 2 and 100 characters")
+        .matches(/^[a-zA-Z0-9.,!?'"()\-:; ]{5,100}$/)
+        .withMessage("Title can only contain alphanumeric characters, punctuation marks, and spaces"),
+    
+    body("description")
+        .optional()
+        .trim()
+        .isLength({ min: 2, max: 500 })
+        .withMessage("Description must be between 2 and 500 characters"),
+    
+    body("isPreview")
+        .optional()
+        .isBoolean()
+        .withMessage("isPreview must be a boolean value"),
+
+    body("order")
+        .optional()
+        .isInt()
+        .withMessage("Order must be an integer"),
+
+    body("isPublished")
+        .optional()
+        .isBoolean()
+        .withMessage("isPublished must be a boolean value")
+])
+
+
+
+
+
+
+
 
 
 
@@ -319,11 +403,11 @@ export const validateReviewUpdateInput = validate([
 ])
 
 
-export const validateReviewDeletion = validate([
-    commonValidations.objectId("reviewId")
+export const validateAverageRatingQuery = validate([
+    commonValidations.objectId("courseId")
 ])
 
 
-export const validateAverageRatingQuery = validate([
-    commonValidations.objectId("courseId")
+export const validateReviewDeletion = validate([
+    commonValidations.objectId("reviewId")
 ])

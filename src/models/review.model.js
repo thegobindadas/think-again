@@ -47,22 +47,65 @@ reviewSchema.statics.calculateAverageRating = async function (courseId) {
                 $group: {
                     _id: "$course",
                     averageRating: { $avg: "$rating" },
-                    numOfRatings: { $sum: 1 }
+                    totalReviews: { $sum: 1 }
                 }
             }
         ]);
     
     
-        return {
-            averageRating: result.length > 0 ? parseFloat(result[0].averageRating.toFixed(1)) : 0,
-            numOfRatings: result.length > 0 ? result[0].numOfRatings : 0
-        }
-        
+        const averageRating = result.length > 0 ? parseFloat(result[0].averageRating.toFixed(1)) : 0
+        const totalReviews = result.length > 0 ? result[0].totalReviews : 0
+
+
+        await mongoose.model("Course").findByIdAndUpdate(courseId, {
+            averageRating,
+            totalReviews
+        });
+
     } catch (error) {
-        console.error(error);
-        return { averageRating: 0, numOfRatings: 0 }
+        console.error("Error updating course rating stats: ", error);
+        throw new Error("Failed to update course rating stats");
     }
 };
+
+
+reviewSchema.post("save", async function () {
+    try {
+        await this.constructor.calculateAverageRating(this.course);
+    } catch (error) {
+        console.error("Error in review post-save middleware:", error);
+    }
+});
+
+
+reviewSchema.post("findOneAndDelete", async function (doc) {
+    if (doc) {
+        try {
+            await doc.constructor.calculateAverageRating(doc.course);
+        } catch (error) {
+            console.error("Error in review post-delete middleware:", error);
+        }
+    }
+});
+
+
+reviewSchema.post("findOneAndUpdate", async function (doc) {
+    if (doc) {
+        try {
+            await doc.constructor.calculateAverageRating(doc.course);
+        } catch (error) {
+            console.error("Error in review post-update middleware:", error);
+        }
+    }
+});
+
+reviewSchema.post("remove", async function () {
+    try {
+        await this.constructor.calculateAverageRating(this.course);
+    } catch (error) {
+        console.error("Error in review post-remove middleware:", error);
+    }
+});
 
 
 
