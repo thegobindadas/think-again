@@ -390,3 +390,17 @@ export const validateAverageRatingQuery = validate([
 export const validateReviewDeletion = validate([
     commonValidations.objectId("reviewId")
 ])
+
+
+
+// Payment (stripe) Validations
+export const validateCreatePaymentIntent = validate([
+    commonValidations.objectId("courseId"),
+    body("priceId")
+        .isString()
+        .withMessage("Price ID is required")
+])
+
+
+
+// Payment (razorpay) Validations

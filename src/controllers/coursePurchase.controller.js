@@ -13,7 +13,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 /**
  * Create a Stripe checkout session for course purchase
- * @route POST /api/v1/payments/create-checkout-session
+ * @route POST /api/v1/purchase/checkout/create-checkout-session
  */
 export const initiateStripeCheckout = catchAsync(async (req, res) => {
   
@@ -89,7 +89,7 @@ export const initiateStripeCheckout = catchAsync(async (req, res) => {
 
 /**
  * Handle Stripe webhook events
- * @route POST /api/v1/payments/webhook
+ * @route POST /api/v1/purchase/webhook
  */
 export const handleStripeWebhook = catchAsync(async (req, res) => {
   let event;
@@ -162,7 +162,7 @@ export const handleStripeWebhook = catchAsync(async (req, res) => {
 
 /**
  * Get course details with purchase status
- * @route GET /api/v1/payments/courses/:courseId/purchase-status
+ * @route GET /api/v1/purchase/course/:courseId/detail-with-status
  */
 export const getCoursePurchaseStatus = catchAsync(async (req, res) => {
   
@@ -200,7 +200,7 @@ export const getCoursePurchaseStatus = catchAsync(async (req, res) => {
 
 /**
  * Get all purchased courses
- * @route GET /api/v1/payments/purchased-courses
+ * @route GET /api/v1/purchase/purchased-courses
  */
 export const getPurchasedCourses = catchAsync(async (req, res) => {
 
