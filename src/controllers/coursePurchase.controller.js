@@ -91,7 +91,73 @@ export const initiateStripeCheckout = catchAsync(async (req, res) => {
  * Handle Stripe webhook events
  * @route POST /api/v1/payments/webhook
  */
+export const handleStripeWebhook = catchAsync(async (req, res) => {
+  let event;
 
+  try {
+    const payloadString = JSON.stringify(req.body, null, 2);
+    const secret = process.env.STRIPE_WEBHOOK_SECRET;
+
+    const header = stripe.webhooks.generateTestHeaderString({
+      payload: payloadString,
+      secret,
+    });
+
+    event = stripe.webhooks.constructEvent(payloadString, header, secret);
+  } catch (error) {
+    throw new AppError(`Webhook Error: ${error.message}`, 400);
+  }
+
+  // Handle the checkout.session.completed event
+  if (event.type === "checkout.session.completed") {
+    const session = event.data.object;
+
+    // Find and update purchase record
+    const purchase = await CoursePurchase.findOne({
+      paymentId: session.id,
+    }).populate("course");
+
+    if (!purchase) {
+      throw new AppError("Purchase record not found", 404);
+    }
+
+
+    // Update purchase details
+    purchase.amount = session.amount_total
+      ? session.amount_total / 100
+      : purchase.amount;
+
+    purchase.status = "completed";
+    await purchase.save();
+
+
+    // Update user's enrolled courses
+    await User.findByIdAndUpdate(
+      purchase.user,
+      {
+        $addToSet: {
+          enrolledCourses: {
+            course: purchase.course._id,
+            enrolledAt: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+
+
+    // Update course's enrolled students
+    await Course.findByIdAndUpdate(
+      purchase.course._id,
+      { $addToSet: { enrolledStudents: purchase.user } },
+      { new: true }
+    );
+  }
+
+
+
+  res.status(200).json({ received: true });
+});
 
 
 /**
