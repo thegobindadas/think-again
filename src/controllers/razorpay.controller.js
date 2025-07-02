@@ -132,6 +132,29 @@ export const verifyPayment = async (req, res) => {
     await purchase.save()
 
 
+    // Update user's enrolled courses
+    await User.findByIdAndUpdate(
+      purchase.user,
+      {
+        $addToSet: {
+          enrolledCourses: {
+            course: purchase.course,
+            enrolledAt: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+
+
+    // Update course's enrolled students
+    await Course.findByIdAndUpdate(
+      purchase.course,
+      { $addToSet: { enrolledStudents: purchase.user } },
+      { new: true }
+    );
+
+
 
     return res.status(200).json({
       purchase,
@@ -198,6 +221,28 @@ export const refundPayment = async (req, res) => {
 
     await purchaseDetails.processRefund(refund.id, refundAmount, refundReason)
     await purchaseDetails.save()
+
+
+    // Update user's enrolled courses
+    await User.findByIdAndUpdate(
+      purchaseDetails.user,
+      {
+        $pull: {
+          enrolledCourses: {
+            course: purchaseDetails.course
+          }
+        }
+      },
+      { new: true }
+    );
+
+
+    // Update course's enrolled students
+    await Course.findByIdAndUpdate(
+      purchaseDetails.course,
+      { $pull: { enrolledStudents: purchaseDetails.user } },
+      { new: true }
+    );
 
 
 
