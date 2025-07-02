@@ -6,6 +6,10 @@ import {
   initiateStripeCheckout,
 } from "../controllers/coursePurchase.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { 
+    validateCreatePaymentIntent, 
+    validateCoursePurchaseStatus
+} from "../middleware/validation.middleware.js";
 
 
 
@@ -17,7 +21,7 @@ const router = Router();
 
 router
   .route("/checkout/create-checkout-session")
-  .post(isAuthenticated, initiateStripeCheckout);
+  .post(isAuthenticated, validateCreatePaymentIntent, initiateStripeCheckout);
 
 router
   .route("/webhook")
@@ -25,7 +29,7 @@ router
 
 router
   .route("/course/:courseId/detail-with-status")
-  .get(isAuthenticated, getCoursePurchaseStatus);
+  .get(isAuthenticated, validateCoursePurchaseStatus, getCoursePurchaseStatus);
 
 router.route("/purchased-courses").get(isAuthenticated, getPurchasedCourses);
 

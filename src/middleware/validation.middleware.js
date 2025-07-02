@@ -395,10 +395,14 @@ export const validateReviewDeletion = validate([
 
 // Payment (stripe) Validations
 export const validateCreatePaymentIntent = validate([
-    commonValidations.objectId("courseId"),
-    body("priceId")
-        .isString()
-        .withMessage("Price ID is required")
+    body("courseId")
+        .isMongoId()
+        .withMessage(`Invalid courseId ID format`),
+])
+
+
+export const validateCoursePurchaseStatus = validate([
+    commonValidations.objectId("courseId")
 ])
 
 
