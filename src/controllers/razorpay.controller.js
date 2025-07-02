@@ -261,3 +261,61 @@ export const refundPayment = async (req, res) => {
     throw new AppError(errMsg, 500);
   }
 };
+
+
+export const getCoursePurchaseStatus = catchAsync(async (req, res) => {
+  
+  const { courseId } = req.params;
+
+  // Find course with populated data
+  const course = await Course.findById(courseId)
+    .populate("instructor", "name avatar")
+    .populate("lectures", "title videoUrl duration");
+
+  if (!course) {
+    throw new AppError("Course not found", 404);
+  }
+
+
+  // Check if user has purchased the course
+  const purchased = await CoursePurchase.exists({
+    user: req.id,
+    course: courseId,
+    status: "completed",
+  });
+
+
+
+  res.status(200).json({
+    data: {
+      course,
+      isPurchased: Boolean(purchased),
+    },
+    message: "Course details fetched successfully",
+    success: true,
+  });
+});
+
+
+export const getPurchasedCourses = catchAsync(async (req, res) => {
+
+  const purchases = await CoursePurchase.find({
+    userId: req.id,
+    status: "completed",
+  }).populate({
+    path: "course",
+    select: "title subtitle category level thumbnail totalLectures  totalDuration",
+    populate: {
+      path: "instructor",
+      select: "name avatar",
+    },
+  });
+
+
+
+  res.status(200).json({
+    data: purchases.map((purchase) => purchase.course),
+    message: "Purchased courses fetched successfully",
+    success: true,
+  });
+});
