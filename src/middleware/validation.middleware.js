@@ -408,3 +408,37 @@ export const validateCoursePurchaseStatus = validate([
 
 
 // Payment (razorpay) Validations
+export const validateRazorpayPaymentOrder = validate([
+    body("courseId")
+        .isMongoId()
+        .withMessage(`Invalid courseId ID format`),
+])
+
+
+export const validateRazorpaySignature = validate([
+    body("razorpay_order_id")
+        .isString()
+        .withMessage("Razorpay order ID is required"),
+
+    body("razorpay_payment_id")
+        .isString()
+        .withMessage("Razorpay payment id is required"),
+
+    body("razorpay_signature")
+        .isString()
+        .withMessage("Razorpay signature is required"),
+])
+
+
+export const validateRazorpayRefundRequest = validate([
+    body("purchaseId")
+        .isMongoId()
+        .withMessage(`Invalid purchaseId ID format`),
+
+    body("refundReason")
+        .isString()
+        .withMessage("Refund reason is required")
+        .trim()
+        .isLength({ min: 2, max: 100 })
+        .withMessage("Comment must be between 2 and 100 characters"),
+])

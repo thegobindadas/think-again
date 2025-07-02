@@ -3,22 +3,37 @@ import {
   createRazorpayOrder,
   verifyPayment,
   refundPayment,
+  getCoursePurchaseStatus,
+  getPurchasedCourses,
 } from "../controllers/razorpay.controller.js";
 import { isAuthenticated } from "../middleware/auth.middleware.js";
+import { 
+  validateRazorpayPaymentOrder,
+  validateRazorpaySignature,
+  validateRazorpayRefundRequest,
+  validateCoursePurchaseStatus,
+} from "../middleware/validation.middleware.js";
 
 
 
 const router = Router();
+router.use(isAuthenticated);
 
 
 
 
 
-router.route("/create-order").post(isAuthenticated, createRazorpayOrder);
+router.route("/create-order").post(validateRazorpayPaymentOrder, createRazorpayOrder);
 
-router.route("/verify-payment").post(isAuthenticated, verifyPayment);
+router.route("/verify-payment").post(validateRazorpaySignature, verifyPayment);
 
-router.route("/refund-payment").post(isAuthenticated, refundPayment);
+router.route("/refund-payment").post(validateRazorpayRefundRequest, refundPayment);
+
+router
+  .route("/course/:courseId/detail-with-status")
+  .get(validateCoursePurchaseStatus, getCoursePurchaseStatus);
+
+router.route("/purchased-courses").get(getPurchasedCourses);
 
 
 

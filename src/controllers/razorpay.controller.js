@@ -13,6 +13,10 @@ const razorpay = new Razorpay({
 
 
 
+/**
+ * Create a Razorpay order
+ * @route POST /api/v1/razorpay/create-order
+ */
 export const createRazorpayOrder = async (req, res) => {
   try {
     
@@ -95,6 +99,10 @@ export const createRazorpayOrder = async (req, res) => {
 };
 
 
+/**
+ * Verify Razorpay payment
+ * @route POST /api/v1/razorpay/verify-payment
+ */
 export const verifyPayment = async (req, res) => {
   try {
 
@@ -168,6 +176,10 @@ export const verifyPayment = async (req, res) => {
 };
 
 
+/**
+ * Refund Razorpay payment
+ * @route POST /api/v1/razorpay/refund-payment
+ */
 export const refundPayment = async (req, res) => {
   try {
     
@@ -263,6 +275,10 @@ export const refundPayment = async (req, res) => {
 };
 
 
+/**
+ * Get course details with purchase status
+ * @route GET /api/v1/razorpay/course/:courseId/detail-with-status
+ */
 export const getCoursePurchaseStatus = catchAsync(async (req, res) => {
   
   const { courseId } = req.params;
@@ -297,6 +313,10 @@ export const getCoursePurchaseStatus = catchAsync(async (req, res) => {
 });
 
 
+/**
+ * Get all purchased courses
+ * @route GET /api/v1/razorpay/purchased-courses
+ */
 export const getPurchasedCourses = catchAsync(async (req, res) => {
 
   const purchases = await CoursePurchase.find({
