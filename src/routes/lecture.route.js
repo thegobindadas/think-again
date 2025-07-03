@@ -33,7 +33,7 @@ router
 
 
 router.route("/:lectureId/toggle-preview")
-    .patch(restrictTo("instructor"), validateLectureParam, toggleLecturePreviewStatus);
+  .patch(restrictTo("instructor"), validateLectureParam, toggleLecturePreviewStatus);
 
 
 router

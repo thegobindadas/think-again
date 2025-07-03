@@ -69,7 +69,7 @@ export const getUserCourseProgress = catchAsync(async (req, res) => {
 
 /**
  * Update progress for a specific lecture
- * @route PATCH /api/v1/progress/:courseId/lectures/:lectureId
+ * @route PATCH /api/v1/progress/:courseId/lecture/:lectureId
  */
 export const updateLectureProgress = catchAsync(async (req, res) => {
     
