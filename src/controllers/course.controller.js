@@ -46,7 +46,6 @@ export const createNewCourse = catchAsync(async (req, res) => {
   newCourse.thumbnailPublicId = uploadResponse.public_id
 
 
-
   const course = await Course.create(newCourse)
 
   if (!course) {
@@ -71,7 +70,7 @@ export const createNewCourse = catchAsync(async (req, res) => {
 
 /**
  * Toggle course publish status
- * @route PATCH /api/v1/course/c/:courseId/publish
+ * @route PATCH /api/v1/course/:courseId/publish
  */
 export const toggleCoursePublishStatus = catchAsync(async (req, res) => {
 
@@ -104,7 +103,7 @@ export const toggleCoursePublishStatus = catchAsync(async (req, res) => {
 
 /**
  * Update course details
- * @route PATCH /api/v1/courses/:courseId
+ * @route PATCH /api/v1/course/:courseId
  */
 export const updateCourseDetails = catchAsync(async (req, res) => {
   
@@ -112,6 +111,7 @@ export const updateCourseDetails = catchAsync(async (req, res) => {
   const { title, subtitle, description, category, level, price } = req.body;
   
   const updatedData = {}
+
 
   const course = await Course.findById(courseId)
 
@@ -122,7 +122,6 @@ export const updateCourseDetails = catchAsync(async (req, res) => {
   if (!req.user || course.instructor.toString() !== req.user?._id.toString()) {
     throw new AppError("You are not authorized to update this course", 403)
   }
-
 
 
   if (req.file) {
@@ -143,12 +142,12 @@ export const updateCourseDetails = catchAsync(async (req, res) => {
 
 
   if (title) updatedData.title = title.trim();
-  if (subtitle !== undefined) updatedData.subtitle = subtitle.trim();
-  if (description !== undefined) updatedData.description = description.trim();
+  if (subtitle !== undefined) updatedData.subtitle = subtitle?.trim() ?? "";
+  if (description !== undefined) updatedData.description = description?.trim() ?? "";
 
   if (category !== undefined) updatedData.category = category
   if (level !== undefined) updatedData.level = level
-  if (price !== undefined) updatedData.price = price
+  if (price !== undefined) updatedData.price = Number(price)
 
 
   const updatedCourse = await Course.findByIdAndUpdate(courseId, updatedData, { new: true, runValidators: true })
@@ -165,12 +164,12 @@ export const updateCourseDetails = catchAsync(async (req, res) => {
 
 /**
  * Get courses created by the current user
- * @route GET /api/v1/courses/my-courses
+ * @route GET /api/v1/course/
  */
 export const getMyCreatedCourses = catchAsync(async (req, res) => {
   
   const courses = await Course.find({ instructor: req.id }).select(
-    "title subtitle description category level price thumbnail isPublished totalLectures totalDuration averageRating numOfRatings"
+    "title subtitle description category level price thumbnail isPublished totalLectures totalDuration averageRating totalReviews"
   )
 
 
@@ -186,7 +185,7 @@ export const getMyCreatedCourses = catchAsync(async (req, res) => {
 
 /**
  * Get all published courses
- * @route GET /api/v1/courses/published
+ * @route GET /api/v1/course/published
  */
 export const getPublishedCourses = catchAsync(async (req, res) => {
 
@@ -224,7 +223,7 @@ export const getPublishedCourses = catchAsync(async (req, res) => {
 
 /**
  * Get course by ID
- * @route GET /api/v1/courses/:courseId
+ * @route GET /api/v1/course/:courseId
  */
 export const getCourseDetails = catchAsync(async (req, res) => {
 
@@ -266,7 +265,7 @@ export const getCourseDetails = catchAsync(async (req, res) => {
 
 /**
  * Search courses with filters
- * @route GET /api/v1/courses/c/:courseId/students
+ * @route GET /api/v1/course/:courseId/students
  */
 export const getCourseEnrolledStudents = catchAsync(async (req, res) => {
   
@@ -301,13 +300,13 @@ export const getCourseEnrolledStudents = catchAsync(async (req, res) => {
 
 /**
  * Search courses with filters
- * @route GET /api/v1/courses/instructor/:instructorId
+ * @route GET /api/v1/course/instructor/:instructorId
  */
 export const getCoursesByInstructor = catchAsync(async (req, res) => {
   
   const { instructorId } = req.params
 
-   const courses = await Course.find({ instructor: instructorId })
+  const courses = await Course.find({ instructor: instructorId })
     .populate({
       path: "instructor",
       select: "name avatar"
@@ -325,7 +324,7 @@ export const getCoursesByInstructor = catchAsync(async (req, res) => {
 
 /**
  * Search courses with filters
- * @route GET /api/v1/courses/search
+ * @route GET /api/v1/course/search
  */
 export const searchCourses = catchAsync(async (req, res) => {
   const {
@@ -395,25 +394,4 @@ export const searchCourses = catchAsync(async (req, res) => {
     message: "Courses fetched successfully",
     success: true,
   });
-});
-
-
-
-
-
-/**
- * Add lecture to course
- * @route POST /api/v1/courses/:courseId/lectures
- */
-export const addLectureToCourse = catchAsync(async (req, res) => {
-  // TODO: Implement add lecture to course functionality
-});
-
-
-/**
- * Get course lectures
- * @route GET /api/v1/courses/:courseId/lectures
- */
-export const getCourseLectures = catchAsync(async (req, res) => {
-  // TODO: Implement get course lectures functionality
 });

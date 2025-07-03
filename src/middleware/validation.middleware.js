@@ -78,7 +78,7 @@ export const commonValidations = {
 
 
 
-// User validation chains
+// User validations
 export const validateSignup = validate([
     commonValidations.name,
     commonValidations.email,
@@ -155,6 +155,8 @@ export const validateResetPassword = validate([
 ]);
 
 
+
+// Course Validations
 export const validateCreateNewCourse = validate([
     body("title")
         .trim()
@@ -162,8 +164,8 @@ export const validateCreateNewCourse = validate([
         .withMessage("Title is required")
         .isLength({ min: 2, max: 50 })
         .withMessage("Title must be between 2 and 50 characters")
-        .matches(/^[a-zA-Z\s]*$/)
-        .withMessage("Title can only contain letters and spaces"),
+        .matches(/^[a-zA-Z0-9.,!?'"()\-:; ]{5,100}$/)
+        .withMessage("Title can only contain alphanumeric characters, punctuation marks, and spaces"),
 
     body("subtitle")
         .optional()
@@ -212,8 +214,8 @@ export const validateUpdateCourseDetails = validate([
         .trim()
         .isLength({ min: 2, max: 50 })
         .withMessage("Title must be between 2 and 50 characters")
-        .matches(/^[a-zA-Z\s]*$/)
-        .withMessage("Title can only contain letters and spaces"),
+        .matches(/^[a-zA-Z0-9.,!?'"()\-:; ]{5,100}$/)
+        .withMessage("Title can only contain alphanumeric characters, punctuation marks, and spaces"),
 
     body("subtitle")
         .optional()
@@ -261,10 +263,9 @@ export const validateToGetCourseEnrolledStudents = validate([
 ])
 
 
-
-
-
-
+export const validateGetCoursesByInstructor = validate([
+    commonValidations.objectId("instructorId")
+])
 
 
 

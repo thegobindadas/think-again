@@ -8,17 +8,17 @@ import {
   getPublishedCourses,
   getCourseDetails,
   getCourseEnrolledStudents,
+  getCoursesByInstructor,
   searchCourses,
-  addLectureToCourse,
-  getCourseLectures,
 } from "../controllers/course.controller.js";
 import { 
   validateCreateNewCourse,
   validateCoursePublishStatus,
+  validateToGetCourseDetails,
   validateUpdateCourseDetails,
   validateToGetPublishedCourses,
-  validateToGetCourseDetails,
   validateToGetCourseEnrolledStudents,
+  validateGetCoursesByInstructor,
 } from "../middleware/validation.middleware.js";
 import upload from "../utils/multer.js";
 import lectureRoute from "./lecture.route.js";
@@ -26,9 +26,8 @@ import lectureRoute from "./lecture.route.js";
 
 
 const router = Router();
+
 router.use("/:courseId/lecture", lectureRoute);
-
-
 
 
 
@@ -37,8 +36,10 @@ router.get("/published", validateToGetPublishedCourses, getPublishedCourses);
 router.get("/search", searchCourses);
 
 
+
 // Protected routes
 router.use(isAuthenticated);
+
 
 
 // Course management
@@ -49,12 +50,15 @@ router
 
 
 // Course details and updates
-router.route("/c/:courseId/publish").patch(restrictTo("instructor"), validateCoursePublishStatus, toggleCoursePublishStatus);
-
-router.route("/c/:courseId/students").get(restrictTo("instructor"), validateToGetCourseEnrolledStudents, getCourseEnrolledStudents);
+router.route("/:courseId/publish")
+  .patch(
+    restrictTo("instructor"), 
+    validateCoursePublishStatus, 
+    toggleCoursePublishStatus
+  )
 
 router
-  .route("/c/:courseId")
+  .route("/:courseId")
   .get(validateToGetCourseDetails, getCourseDetails)
   .patch(
     restrictTo("instructor"),
@@ -63,12 +67,9 @@ router
     updateCourseDetails
   );
 
+router.route("/:courseId/students").get(restrictTo("instructor"), validateToGetCourseEnrolledStudents, getCourseEnrolledStudents)
 
-// Lecture management
-router
-  .route("/c/:courseId/lectures")
-  .get(getCourseLectures)
-  .post(restrictTo("instructor"), upload.single("video"), addLectureToCourse);
+router.route("/instructor/:instructorId").get(validateGetCoursesByInstructor, getCoursesByInstructor)
 
 
 
